@@ -1,0 +1,98 @@
+@model CourseManagement.Models.Category
+@{
+    ViewData["Title"] = "Chi tiết danh mục";
+}
+
+<div class="page-header">
+    <div class="container-xl">
+        <h1><i class="fas fa-folder-open me-2" style="color:var(--primary-light)"></i>@Model.Name</h1>
+        <nav aria-label="breadcrumb" class="mt-1">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Trang chủ</a></li>
+                <li class="breadcrumb-item"><a asp-action="Index">Danh mục</a></li>
+                <li class="breadcrumb-item active">@Model.Name</li>
+            </ol>
+        </nav>
+    </div>
+</div>
+
+<div class="container-xl pb-5">
+    <div class="row g-4">
+        <!-- Info Card -->
+        <div class="col-lg-4">
+            <div class="form-dark">
+                <div class="stat-icon purple mb-3" style="width:60px;height:60px;font-size:26px;">
+                    <i class="fas fa-tags"></i>
+                </div>
+                <h4 style="font-weight:700; color:var(--text-primary);">@Model.Name</h4>
+                <p style="color:var(--text-secondary); font-size:0.9rem; margin:12px 0 20px;">
+                    @(string.IsNullOrEmpty(Model.Description) ? "Không có mô tả." : Model.Description)
+                </p>
+                <div class="stat-card" style="border-radius:10px; padding:14px;">
+                    <div class="d-flex justify-content-between">
+                        <span style="color:var(--text-secondary); font-size:0.85rem;">Số khóa học</span>
+                        <span class="badge-category">@(Model.Courses?.Count ?? 0)</span>
+                    </div>
+                </div>
+                @if (User.Identity.IsAuthenticated)
+                {
+                    <div class="d-flex gap-2 mt-4">
+                        <a asp-action="Edit" asp-route-id="@Model.Id" class="btn-success-custom flex-fill justify-content-center">
+                            <i class="fas fa-pen"></i> Sửa
+                        </a>
+                        <a asp-action="Delete" asp-route-id="@Model.Id" class="btn-danger-custom flex-fill justify-content-center">
+                            <i class="fas fa-trash"></i> Xóa
+                        </a>
+                    </div>
+                }
+                <a asp-action="Index" class="btn-outline-custom mt-3 w-100 justify-content-center">
+                    <i class="fas fa-arrow-left"></i> Quay lại
+                </a>
+            </div>
+        </div>
+
+        <!-- Courses in this category -->
+        <div class="col-lg-8">
+            <h5 style="font-weight:700; margin-bottom:20px; color:var(--text-primary);">
+                Khóa học trong danh mục này
+            </h5>
+            @if (Model.Courses != null && Model.Courses.Any())
+            {
+                <div class="row g-3">
+                    @foreach (var course in Model.Courses)
+                    {
+                        <div class="col-md-6">
+                            <div class="card-dark p-3">
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <div>
+                                        <h6 style="font-weight:700; color:var(--text-primary); margin:0 0 6px;">@course.Title</h6>
+                                        <span class="@(course.IsActive ? "badge-active" : "badge-inactive")">
+                                            @(course.IsActive ? "Đang mở" : "Tạm dừng")
+                                        </span>
+                                    </div>
+                                    <span class="course-price @(course.Price == 0 ? "free" : "")" style="font-size:1rem;">
+                                        @(course.Price == 0 ? "Miễn phí" : course.Price.ToString("N0") + "₫")
+                                    </span>
+                                </div>
+                                <div class="mt-3">
+                                    <a asp-controller="Courses" asp-action="Details" asp-route-id="@course.Id"
+                                       class="btn-outline-custom py-1 px-3" style="font-size:0.8rem;">
+                                        <i class="fas fa-eye"></i> Xem chi tiết
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+            else
+            {
+                <div class="empty-state">
+                    <i class="fas fa-book-open"></i>
+                    <h5>Chưa có khóa học nào</h5>
+                    <p>Chưa có khóa học nào trong danh mục này.</p>
+                </div>
+            }
+        </div>
+    </div>
+</div>

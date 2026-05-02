@@ -1,0 +1,327 @@
+@{
+    ViewData["Title"] = "Trang chủ";
+}
+
+<!-- Hero Section -->
+<section class="hero-section">
+    <div class="hero-bg"></div>
+    <div class="container-xl position-relative">
+        <div class="row align-items-center min-vh-hero">
+            <div class="col-lg-6 animate-fade-up">
+                <div class="hero-badge mb-4">
+                    <i class="fas fa-star me-2"></i> Nền tảng học tập #1 Việt Nam
+                </div>
+                <h1 class="hero-title">
+                    Nâng tầm kỹ năng với<br>
+                    <span class="hero-highlight">EduManage</span>
+                </h1>
+                <p class="hero-desc">
+                    Hệ thống quản lý khóa học trực tuyến hiện đại. Học từ những giảng viên hàng đầu,
+                    theo dõi tiến độ và phát triển sự nghiệp của bạn.
+                </p>
+                <div class="hero-actions">
+                    <a asp-controller="Courses" asp-action="Index" class="btn-primary-custom btn-lg-custom">
+                        <i class="fas fa-rocket"></i> Khám phá khóa học
+                    </a>
+                    @if (!User.Identity.IsAuthenticated)
+                    {
+                        <a asp-area="Identity" asp-page="/Account/Register" class="btn-outline-custom btn-lg-custom">
+                            <i class="fas fa-user-plus"></i> Đăng ký miễn phí
+                        </a>
+                    }
+                </div>
+                <div class="hero-stats mt-5">
+                    <div class="hero-stat">
+                        <span class="hero-stat-num">1,000+</span>
+                        <span class="hero-stat-label">Khóa học</span>
+                    </div>
+                    <div class="hero-stat-divider"></div>
+                    <div class="hero-stat">
+                        <span class="hero-stat-num">50K+</span>
+                        <span class="hero-stat-label">Học viên</span>
+                    </div>
+                    <div class="hero-stat-divider"></div>
+                    <div class="hero-stat">
+                        <span class="hero-stat-num">200+</span>
+                        <span class="hero-stat-label">Giảng viên</span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-6 d-none d-lg-flex justify-content-end">
+                <div class="hero-visual">
+                    <div class="hero-orb orb-1"></div>
+                    <div class="hero-orb orb-2"></div>
+                    <div class="hero-card-float card-float-1">
+                        <i class="fas fa-code text-purple"></i>
+                        <span>Lập trình Web</span>
+                    </div>
+                    <div class="hero-card-float card-float-2">
+                        <i class="fas fa-database text-pink"></i>
+                        <span>Cơ sở dữ liệu</span>
+                    </div>
+                    <div class="hero-card-float card-float-3">
+                        <i class="fas fa-mobile-alt text-green"></i>
+                        <span>Mobile App</span>
+                    </div>
+                    <div class="hero-main-icon">
+                        <i class="fas fa-graduation-cap"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Stats Bar -->
+<section class="stats-bar section-sm">
+    <div class="container-xl">
+        <div class="row g-4">
+            <div class="col-6 col-md-3">
+                <div class="stat-card text-center">
+                    <div class="stat-icon purple mx-auto">
+                        <i class="fas fa-book-open"></i>
+                    </div>
+                    <div class="stat-number">@ViewBag.TotalCourses</div>
+                    <div class="stat-label">Khóa học</div>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="stat-card text-center">
+                    <div class="stat-icon pink mx-auto">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <div class="stat-number">@ViewBag.TotalStudents</div>
+                    <div class="stat-label">Học viên</div>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="stat-card text-center">
+                    <div class="stat-icon green mx-auto">
+                        <i class="fas fa-tags"></i>
+                    </div>
+                    <div class="stat-number">@ViewBag.TotalCategories</div>
+                    <div class="stat-label">Danh mục</div>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="stat-card text-center">
+                    <div class="stat-icon orange mx-auto">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <div class="stat-number">@ViewBag.TotalEnrollments</div>
+                    <div class="stat-label">Lượt đăng ký</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Featured Courses -->
+<section class="section">
+    <div class="container-xl">
+        <div class="d-flex justify-content-between align-items-end mb-5">
+            <div>
+                <h2 class="section-title">Khóa học nổi bật</h2>
+                <p class="section-subtitle">Các khóa học được yêu thích nhất hiện tại</p>
+            </div>
+            <a asp-controller="Courses" asp-action="Index" class="btn-outline-custom">
+                Xem tất cả <i class="fas fa-arrow-right ms-1"></i>
+            </a>
+        </div>
+
+        @if (ViewBag.FeaturedCourses != null && ((IEnumerable<CourseManagement.Models.Course>)ViewBag.FeaturedCourses).Any())
+        {
+            <div class="row g-4">
+                @foreach (var course in (IEnumerable<CourseManagement.Models.Course>)ViewBag.FeaturedCourses)
+                {
+                    <div class="col-md-6 col-lg-4 col-xl-3">
+                        <div class="card-dark h-100">
+                            <div class="card-img-wrap">
+                                @if (!string.IsNullOrEmpty(course.ImageUrl))
+                                {
+                                    <img src="@course.ImageUrl" alt="@course.Title" />
+                                }
+                                else
+                                {
+                                    <div class="card-img-placeholder">
+                                        <i class="fas fa-book-open"></i>
+                                    </div>
+                                }
+                                @if (!course.IsActive)
+                                {
+                                    <div class="course-status-overlay">Tạm dừng</div>
+                                }
+                            </div>
+                            <div class="card-body-dark d-flex flex-column">
+                                <span class="badge-category">@course.Category?.Name</span>
+                                <h3 class="course-title">@course.Title</h3>
+                                <p class="course-desc">@course.Description</p>
+                                <div class="mt-auto d-flex justify-content-between align-items-center pt-3 border-top" style="border-color: var(--border-color) !important;">
+                                    <span class="course-price @(course.Price == 0 ? "free" : "")">
+                                        @(course.Price == 0 ? "Miễn phí" : course.Price.ToString("N0") + " ₫")
+                                    </span>
+                                    <a asp-controller="Courses" asp-action="Details" asp-route-id="@course.Id" class="btn-primary-custom py-1 px-3">
+                                        Chi tiết
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+        else
+        {
+            <div class="empty-state">
+                <i class="fas fa-book-open"></i>
+                <h5>Chưa có khóa học nào</h5>
+                <p class="mt-2">Hãy thêm khóa học đầu tiên của bạn!</p>
+                <a asp-controller="Courses" asp-action="Create" class="btn-primary-custom mt-3">
+                    <i class="fas fa-plus"></i> Thêm khóa học
+                </a>
+            </div>
+        }
+    </div>
+</section>
+
+<!-- CTA Section -->
+@if (!User.Identity.IsAuthenticated)
+{
+    <section class="cta-section">
+        <div class="container-xl text-center">
+            <div class="cta-inner">
+                <h2 class="cta-title">Sẵn sàng bắt đầu hành trình học tập?</h2>
+                <p class="cta-desc">Đăng ký ngay hôm nay và truy cập hàng trăm khóa học chất lượng cao.</p>
+                <a asp-area="Identity" asp-page="/Account/Register" class="btn-primary-custom btn-lg-custom">
+                    <i class="fas fa-rocket"></i> Bắt đầu ngay - Miễn phí
+                </a>
+            </div>
+        </div>
+    </section>
+}
+
+@section Styles {
+<style>
+    /* Hero */
+    .hero-section {
+        position: relative;
+        padding: 100px 0 80px;
+        overflow: hidden;
+    }
+    .hero-bg {
+        position: absolute; inset: 0;
+        background: radial-gradient(ellipse at 60% 50%, rgba(108,99,255,0.12) 0%, transparent 60%),
+                    radial-gradient(ellipse at 20% 80%, rgba(255,101,132,0.08) 0%, transparent 50%);
+        pointer-events: none;
+    }
+    .min-vh-hero { min-height: 500px; }
+    .hero-badge {
+        display: inline-flex; align-items: center;
+        background: rgba(108,99,255,0.12);
+        color: var(--primary-light);
+        border: 1px solid rgba(108,99,255,0.25);
+        padding: 6px 16px;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+    }
+    .hero-title {
+        font-size: clamp(2rem, 4vw, 3rem);
+        font-weight: 800;
+        letter-spacing: -1px;
+        line-height: 1.15;
+        color: var(--text-primary);
+    }
+    .hero-highlight {
+        background: linear-gradient(135deg, var(--primary-light), var(--accent));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+    .hero-desc {
+        color: var(--text-secondary);
+        font-size: 1.05rem;
+        max-width: 480px;
+        margin: 20px 0;
+    }
+    .hero-actions { display: flex; gap: 14px; flex-wrap: wrap; }
+    .btn-lg-custom { padding: 13px 28px !important; font-size: 1rem !important; }
+    .hero-stats { display: flex; align-items: center; gap: 24px; }
+    .hero-stat-num { display: block; font-size: 1.5rem; font-weight: 800; color: var(--text-primary); }
+    .hero-stat-label { font-size: 0.8rem; color: var(--text-secondary); }
+    .hero-stat-divider { width: 1px; height: 40px; background: var(--border-color); }
+
+    /* Hero Visual */
+    .hero-visual {
+        width: 420px; height: 420px;
+        position: relative;
+    }
+    .hero-main-icon {
+        width: 140px; height: 140px;
+        background: linear-gradient(135deg, var(--primary), var(--accent));
+        border-radius: 40px;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 60px; color: white;
+        position: absolute; top: 50%; left: 50%;
+        transform: translate(-50%, -50%);
+        box-shadow: 0 20px 60px rgba(108,99,255,0.4);
+    }
+    .hero-orb {
+        position: absolute; border-radius: 50%;
+        animation: float 6s ease-in-out infinite;
+    }
+    .orb-1 {
+        width: 300px; height: 300px;
+        background: radial-gradient(circle, rgba(108,99,255,0.15), transparent);
+        top: 50%; left: 50%; transform: translate(-50%, -50%);
+    }
+    .orb-2 {
+        width: 200px; height: 200px;
+        background: radial-gradient(circle, rgba(255,101,132,0.1), transparent);
+        top: 10%; right: 10%;
+        animation-delay: -3s;
+    }
+    .hero-card-float {
+        position: absolute;
+        background: var(--bg-card);
+        border: 1px solid var(--border-color);
+        border-radius: 12px;
+        padding: 10px 16px;
+        display: flex; align-items: center; gap: 8px;
+        font-size: 0.85rem; font-weight: 600; color: var(--text-primary);
+        box-shadow: var(--shadow);
+        white-space: nowrap;
+    }
+    .card-float-1 { top: 8%; left: 5%; animation: float 5s ease-in-out infinite; }
+    .card-float-2 { bottom: 15%; right: 0%; animation: float 7s ease-in-out infinite; animation-delay: -2s; }
+    .card-float-3 { bottom: 40%; left: 0%; animation: float 6s ease-in-out infinite; animation-delay: -4s; }
+    .text-purple { color: var(--primary-light) !important; }
+    .text-pink { color: #FF6584 !important; }
+    .text-green { color: #4ade80 !important; }
+
+    @keyframes float {
+        0%, 100% { transform: translateY(0px); }
+        50%       { transform: translateY(-12px); }
+    }
+
+    /* CTA Section */
+    .cta-section {
+        padding: 80px 0;
+        background: linear-gradient(135deg, rgba(108,99,255,0.08), rgba(255,101,132,0.05));
+        border-top: 1px solid var(--border-color);
+        border-bottom: 1px solid var(--border-color);
+    }
+    .cta-inner { max-width: 600px; margin: 0 auto; }
+    .cta-title { font-size: 2rem; font-weight: 800; color: var(--text-primary); margin-bottom: 16px; }
+    .cta-desc { color: var(--text-secondary); font-size: 1.05rem; margin-bottom: 28px; }
+
+    /* Overlay for inactive courses */
+    .course-status-overlay {
+        position: absolute; inset: 0;
+        background: rgba(0,0,0,0.6);
+        display: flex; align-items: center; justify-content: center;
+        color: #f87171; font-weight: 700; font-size: 0.9rem;
+        letter-spacing: 1px;
+    }
+</style>
+}

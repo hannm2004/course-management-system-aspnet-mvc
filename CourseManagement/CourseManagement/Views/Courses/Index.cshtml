@@ -1,0 +1,164 @@
+@model IEnumerable<CourseManagement.Models.Course>
+@{
+    ViewData["Title"] = "Danh sách khóa học";
+}
+
+<!-- Page Header -->
+<div class="page-header">
+    <div class="container-xl">
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+            <div>
+                <h1><i class="fas fa-book-open me-2" style="color:var(--primary-light)"></i>Khóa học</h1>
+                <nav aria-label="breadcrumb" class="mt-1">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Trang chủ</a></li>
+                        <li class="breadcrumb-item active">Khóa học</li>
+                    </ol>
+                </nav>
+            </div>
+            @if (User.Identity.IsAuthenticated)
+            {
+                <a asp-action="Create" class="btn-primary-custom">
+                    <i class="fas fa-plus"></i> Thêm khóa học
+                </a>
+            }
+        </div>
+    </div>
+</div>
+
+<div class="container-xl pb-5">
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert-dark alert-success mb-4">
+            <i class="fas fa-check-circle me-2"></i> @TempData["Success"]
+        </div>
+    }
+
+    <!-- Filter Bar -->
+    <form method="get" class="filter-bar mb-5">
+        <div class="row g-3 align-items-end">
+            <div class="col-md-5">
+                <div class="search-bar">
+                    <i class="fas fa-search"></i>
+                    <input type="text" name="search" value="@ViewBag.Search"
+                           class="form-control-dark" placeholder="Tìm kiếm khóa học..." />
+                </div>
+            </div>
+            <div class="col-md-3">
+                <select name="categoryId" class="form-select">
+                    <option value="">-- Tất cả danh mục --</option>
+                    @foreach (var item in (IEnumerable<SelectListItem>)ViewBag.Categories)
+                    {
+                        <option value="@item.Value" selected="@(item.Value == ViewBag.CategoryId?.ToString())">@item.Text</option>
+                    }
+                </select>
+            </div>
+            <div class="col-md-3">
+                <select name="sort" class="form-select">
+                    <option value="newest" selected="@(ViewBag.Sort == "newest")">Mới nhất</option>
+                    <option value="name" selected="@(ViewBag.Sort == "name")">Tên A-Z</option>
+                    <option value="price_asc" selected="@(ViewBag.Sort == "price_asc")">Giá thấp nhất</option>
+                    <option value="price_desc" selected="@(ViewBag.Sort == "price_desc")">Giá cao nhất</option>
+                </select>
+            </div>
+            <div class="col-md-1">
+                <button type="submit" class="btn-primary-custom w-100 justify-content-center">
+                    <i class="fas fa-filter"></i>
+                </button>
+            </div>
+        </div>
+    </form>
+
+    <!-- Results Info -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <span style="color:var(--text-secondary); font-size:0.875rem;">
+            Tìm thấy <strong style="color:var(--text-primary);">@Model.Count()</strong> khóa học
+        </span>
+        @if (!string.IsNullOrEmpty(ViewBag.Search as string) || ViewBag.CategoryId != null)
+        {
+            <a asp-action="Index" style="color:var(--primary-light); font-size:0.875rem; text-decoration:none;">
+                <i class="fas fa-times me-1"></i> Xóa bộ lọc
+            </a>
+        }
+    </div>
+
+    <!-- Course Grid -->
+    @if (Model.Any())
+    {
+        <div class="row g-4">
+            @foreach (var course in Model)
+            {
+                <div class="col-md-6 col-lg-4 col-xl-3">
+                    <div class="card-dark h-100">
+                        <div class="card-img-wrap">
+                            @if (!string.IsNullOrEmpty(course.ImageUrl))
+                            {
+                                <img src="@course.ImageUrl" alt="@course.Title" loading="lazy" />
+                            }
+                            else
+                            {
+                                <div class="card-img-placeholder">
+                                    <i class="fas fa-book-open"></i>
+                                </div>
+                            }
+                            <div style="position:absolute; top:10px; right:10px;">
+                                <span class="@(course.IsActive ? "badge-active" : "badge-inactive")">
+                                    @(course.IsActive ? "Đang mở" : "Tạm dừng")
+                                </span>
+                            </div>
+                        </div>
+                        <div class="card-body-dark d-flex flex-column">
+                            <span class="badge-category">@course.Category?.Name</span>
+                            <h3 class="course-title">@course.Title</h3>
+                            <p class="course-desc">@course.Description</p>
+
+                            <div class="mt-2" style="color:var(--text-secondary); font-size:0.78rem;">
+                                <i class="fas fa-users me-1"></i> @(course.CourseEnrollments?.Count ?? 0) học viên
+                                &nbsp;|&nbsp;
+                                <i class="fas fa-calendar me-1"></i> @course.StartDate.ToString("dd/MM/yyyy")
+                            </div>
+
+                            <div class="mt-auto pt-3 border-top d-flex justify-content-between align-items-center"
+                                 style="border-color:var(--border-color) !important;">
+                                <span class="course-price @(course.Price == 0 ? "free" : "")">
+                                    @(course.Price == 0 ? "Miễn phí" : course.Price.ToString("N0") + " ₫")
+                                </span>
+                                <div class="d-flex gap-1">
+                                    <a asp-action="Details" asp-route-id="@course.Id"
+                                       class="btn-outline-custom py-1 px-2" style="font-size:0.8rem;">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                    @if (User.Identity.IsAuthenticated)
+                                    {
+                                        <a asp-action="Edit" asp-route-id="@course.Id"
+                                           class="btn-success-custom py-1 px-2" style="font-size:0.8rem;">
+                                            <i class="fas fa-pen"></i>
+                                        </a>
+                                        <a asp-action="Delete" asp-route-id="@course.Id"
+                                           class="btn-danger-custom py-1 px-2" style="font-size:0.8rem;">
+                                            <i class="fas fa-trash"></i>
+                                        </a>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <div class="empty-state">
+            <i class="fas fa-search"></i>
+            <h5>Không tìm thấy khóa học nào</h5>
+            <p class="mt-2">Thử thay đổi bộ lọc hoặc từ khóa tìm kiếm.</p>
+            @if (User.Identity.IsAuthenticated)
+            {
+                <a asp-action="Create" class="btn-primary-custom mt-3">
+                    <i class="fas fa-plus"></i> Thêm khóa học mới
+                </a>
+            }
+        </div>
+    }
+</div>
