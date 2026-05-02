@@ -1,0 +1,63 @@
+@model CourseManagement.Models.Category
+@{
+    ViewData["Title"] = "Xóa danh mục";
+}
+
+<div class="page-header">
+    <div class="container-xl">
+        <h1><i class="fas fa-trash me-2" style="color:var(--danger)"></i>Xác nhận xóa</h1>
+        <nav aria-label="breadcrumb" class="mt-1">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Trang chủ</a></li>
+                <li class="breadcrumb-item"><a asp-action="Index">Danh mục</a></li>
+                <li class="breadcrumb-item active">Xóa</li>
+            </ol>
+        </nav>
+    </div>
+</div>
+
+<div class="container-xl pb-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-6">
+            <div class="form-dark text-center">
+                <div style="width:80px;height:80px;background:rgba(239,68,68,0.1);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 24px;font-size:2rem;color:#f87171;">
+                    <i class="fas fa-exclamation-triangle"></i>
+                </div>
+                <h4 style="font-weight:700; color:var(--text-primary);">Bạn chắc chắn muốn xóa?</h4>
+                <p style="color:var(--text-secondary); margin: 12px 0 24px;">
+                    Danh mục <strong style="color:var(--text-primary);">"@Model.Name"</strong> sẽ bị xóa vĩnh viễn.
+                    @if (Model.Courses != null && Model.Courses.Any())
+                    {
+                        <br /><span style="color:#f87171;">⚠ Danh mục này chứa <strong>@Model.Courses.Count</strong> khóa học sẽ bị ảnh hưởng.</span>
+                    }
+                </p>
+
+                <div style="background:var(--bg-surface); border-radius:10px; padding:16px; margin-bottom:24px; text-align:left;">
+                    <div class="d-flex gap-3">
+                        <div style="color:var(--text-secondary); font-size:0.85rem; min-width:80px;">Tên:</div>
+                        <div style="font-weight:600;">@Model.Name</div>
+                    </div>
+                    @if (!string.IsNullOrEmpty(Model.Description))
+                    {
+                        <div class="d-flex gap-3 mt-2">
+                            <div style="color:var(--text-secondary); font-size:0.85rem; min-width:80px;">Mô tả:</div>
+                            <div style="color:var(--text-secondary);">@Model.Description</div>
+                        </div>
+                    }
+                </div>
+
+                <form asp-action="Delete">
+                    <input type="hidden" asp-for="Id" />
+                    <div class="d-flex gap-3 justify-content-center">
+                        <button type="submit" class="btn-danger-custom" style="padding:10px 24px;">
+                            <i class="fas fa-trash"></i> Xác nhận xóa
+                        </button>
+                        <a asp-action="Index" class="btn-outline-custom">
+                            <i class="fas fa-arrow-left"></i> Hủy bỏ
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
