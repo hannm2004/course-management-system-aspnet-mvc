@@ -1,0 +1,46 @@
+@using Microsoft.AspNetCore.Identity
+@using CourseManagement.Models
+@inject SignInManager<ApplicationUser> SignInManager
+@inject UserManager<ApplicationUser> UserManager
+
+<ul class="navbar-nav">
+@if (SignInManager.IsSignedIn(User))
+{
+    var user = await UserManager.GetUserAsync(User);
+    <li class="nav-item dropdown">
+        <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+            <i class="fas fa-user-circle fs-5 me-2"></i>
+            Xin chào, @(user?.FullName ?? User.Identity?.Name)
+        </a>
+        <ul class="dropdown-menu dropdown-menu-end shadow border-0" aria-labelledby="navbarDropdown">
+            @if (User.IsInRole("Admin"))
+            {
+                <li><a class="dropdown-item" asp-controller="Admin" asp-action="Index"><i class="fas fa-cog fa-fw me-2"></i>Quản trị hệ thống</a></li>
+            }
+            @if (User.IsInRole("Employee"))
+            {
+                <li><a class="dropdown-item" asp-controller="Course" asp-action="Index"><i class="fas fa-chalkboard-teacher fa-fw me-2"></i>Quản lý khóa học</a></li>
+            }
+            @if (User.IsInRole("Customer"))
+            {
+                <li><a class="dropdown-item" asp-controller="Enrollment" asp-action="MyCourses"><i class="fas fa-book fa-fw me-2"></i>Khóa học của tôi</a></li>
+            }
+            <li><hr class="dropdown-divider"></li>
+            <li>
+                <form class="form-inline" asp-controller="Account" asp-action="Logout" method="post">
+                    <button type="submit" class="dropdown-item text-danger"><i class="fas fa-sign-out-alt fa-fw me-2"></i>Đăng xuất</button>
+                </form>
+            </li>
+        </ul>
+    </li>
+}
+else
+{
+    <li class="nav-item">
+        <a class="nav-link" asp-controller="Account" asp-action="Login">Đăng nhập</a>
+    </li>
+    <li class="nav-item">
+        <a class="btn btn-primary-custom ms-lg-2" asp-controller="Account" asp-action="Register">Đăng ký</a>
+    </li>
+}
+</ul>
