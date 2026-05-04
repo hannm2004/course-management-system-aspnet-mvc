@@ -67,48 +67,7 @@
                 </ul>
 
                 <!-- Right Nav -->
-                <ul class="navbar-nav gap-2 align-items-center">
-                    @if (User.Identity.IsAuthenticated)
-                    {
-                        <li class="nav-item dropdown">
-                            <a class="nav-link d-flex align-items-center gap-2 user-menu" href="#" data-bs-toggle="dropdown">
-                                <div class="user-avatar">
-                                    <i class="fas fa-user-circle"></i>
-                                </div>
-                                <span class="d-none d-lg-inline">@User.Identity.Name</span>
-                                <i class="fas fa-chevron-down small"></i>
-                            </a>
-                            <ul class="dropdown-menu dropdown-menu-end dropdown-dark-custom">
-                                <li>
-                                    <a class="dropdown-item" asp-area="Identity" asp-page="/Account/Manage/Index">
-                                        <i class="fas fa-user-cog me-2"></i> Hồ sơ
-                                    </a>
-                                </li>
-                                <li><hr class="dropdown-divider opacity-25"></li>
-                                <li>
-                                    <form asp-area="Identity" asp-page="/Account/Logout" method="post">
-                                        <button type="submit" class="dropdown-item text-danger">
-                                            <i class="fas fa-sign-out-alt me-2"></i> Đăng xuất
-                                        </button>
-                                    </form>
-                                </li>
-                            </ul>
-                        </li>
-                    }
-                    else
-                    {
-                        <li class="nav-item">
-                            <a class="nav-link nav-pill" asp-area="Identity" asp-page="/Account/Login">
-                                <i class="fas fa-sign-in-alt me-1"></i> Đăng nhập
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="btn btn-primary btn-register" asp-area="Identity" asp-page="/Account/Register">
-                                <i class="fas fa-user-plus me-1"></i> Đăng ký
-                            </a>
-                        </li>
-                    }
-                </ul>
+                <partial name="_LoginPartial" />
             </div>
         </div>
     </nav>
@@ -143,12 +102,12 @@
                     <ul class="footer-links">
                         @if (User.Identity.IsAuthenticated)
                         {
-                            <li><a asp-area="Identity" asp-page="/Account/Manage/Index">Hồ sơ</a></li>
+                            <li><a href="#">Hồ sơ</a></li>
                         }
                         else
                         {
-                            <li><a asp-area="Identity" asp-page="/Account/Login">Đăng nhập</a></li>
-                            <li><a asp-area="Identity" asp-page="/Account/Register">Đăng ký</a></li>
+                            <li><a asp-controller="Account" asp-action="Login">Đăng nhập</a></li>
+                            <li><a asp-controller="Account" asp-action="Register">Đăng ký</a></li>
                         }
                     </ul>
                 </div>
