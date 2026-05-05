@@ -8,27 +8,40 @@
 {
     var user = await UserManager.GetUserAsync(User);
     <li class="nav-item dropdown">
-        <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-            <i class="fas fa-user-circle fs-5 me-2"></i>
-            Xin chào, @(user?.FullName ?? User.Identity?.Name)
+        <a class="nav-link dropdown-toggle d-flex align-items-center gap-2" href="#"
+           id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+            <div style="width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,#667eea,#764ba2);
+                        display:flex;align-items:center;justify-content:center;color:white;font-weight:700;font-size:0.8rem;">
+                @(user?.FullName?.FirstOrDefault().ToString()?.ToUpper() ?? "?")
+            </div>
+            <span>@(user?.FullName ?? User.Identity?.Name)</span>
         </a>
-        <ul class="dropdown-menu dropdown-menu-end shadow border-0" aria-labelledby="navbarDropdown">
-            @if (User.IsInRole("Admin"))
-            {
-                <li><a class="dropdown-item" asp-controller="Admin" asp-action="Index"><i class="fas fa-cog fa-fw me-2"></i>Quản trị hệ thống</a></li>
-            }
-            @if (User.IsInRole("Employee"))
-            {
-                <li><a class="dropdown-item" asp-controller="Course" asp-action="Index"><i class="fas fa-chalkboard-teacher fa-fw me-2"></i>Quản lý khóa học</a></li>
-            }
-            @if (User.IsInRole("Customer"))
-            {
-                <li><a class="dropdown-item" asp-controller="Enrollment" asp-action="MyCourses"><i class="fas fa-book fa-fw me-2"></i>Khóa học của tôi</a></li>
-            }
-            <li><hr class="dropdown-divider"></li>
+        <ul class="dropdown-menu dropdown-menu-end shadow border-0 rounded-3 py-2" aria-labelledby="navbarDropdown">
+            <li class="px-3 py-1 mb-1">
+                <div style="font-size:0.8rem;color:#9a9a9a;">Đăng nhập với</div>
+                <div style="font-weight:600;font-size:0.9rem;">@user?.Email</div>
+            </li>
+            <li><hr class="dropdown-divider my-1"></li>
             <li>
-                <form class="form-inline" asp-controller="Account" asp-action="Logout" method="post">
-                    <button type="submit" class="dropdown-item text-danger"><i class="fas fa-sign-out-alt fa-fw me-2"></i>Đăng xuất</button>
+                <a class="dropdown-item py-2" asp-controller="Enrollments" asp-action="MyEnrollments">
+                    <i class="fas fa-graduation-cap fa-fw me-2 text-primary"></i>Khóa học của tôi
+                </a>
+            </li>
+            @if (User.IsInRole("Admin") || User.IsInRole("Employee"))
+            {
+                <li>
+                    <a class="dropdown-item py-2" asp-controller="Courses" asp-action="Create">
+                        <i class="fas fa-plus-circle fa-fw me-2 text-success"></i>Tạo khóa học mới
+                    </a>
+                </li>
+            }
+            <li><hr class="dropdown-divider my-1"></li>
+            <li>
+                <form asp-controller="Account" asp-action="Logout" method="post">
+                    @Html.AntiForgeryToken()
+                    <button type="submit" class="dropdown-item py-2 text-danger">
+                        <i class="fas fa-sign-out-alt fa-fw me-2"></i>Đăng xuất
+                    </button>
                 </form>
             </li>
         </ul>
@@ -37,10 +50,14 @@
 else
 {
     <li class="nav-item">
-        <a class="nav-link" asp-controller="Account" asp-action="Login">Đăng nhập</a>
+        <a class="nav-link nav-pill" asp-controller="Account" asp-action="Login">Đăng nhập</a>
     </li>
-    <li class="nav-item">
-        <a class="btn btn-primary-custom ms-lg-2" asp-controller="Account" asp-action="Register">Đăng ký</a>
+    <li class="nav-item ms-lg-1">
+        <a class="btn btn-sm px-3 py-2 rounded-pill fw-600"
+           style="background:linear-gradient(135deg,#667eea,#764ba2);color:white;text-decoration:none;"
+           asp-controller="Account" asp-action="Register">
+            Đăng ký miễn phí
+        </a>
     </li>
 }
 </ul>

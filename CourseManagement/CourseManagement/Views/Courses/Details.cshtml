@@ -3,188 +3,748 @@
     ViewData["Title"] = Model.Title;
     int totalLessons = Model.Modules?.Sum(m => m.Lessons?.Count ?? 0) ?? 0;
     int totalModules = Model.Modules?.Count ?? 0;
+    var currentUserId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+    var isInstructor = User.Identity.IsAuthenticated && Model.InstructorId == currentUserId;
 }
 
-<div class="page-header">
+@section Styles {
+<style>
+    .details-hero {
+        background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+        padding: 60px 0 40px;
+        color: white;
+        margin-top: -1px;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .details-hero::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -10%;
+        width: 500px;
+        height: 500px;
+        border-radius: 50%;
+        background: radial-gradient(circle, rgba(102,126,234,0.15) 0%, transparent 70%);
+        pointer-events: none;
+    }
+
+    .course-badge-cat {
+        display: inline-block;
+        background: rgba(102,126,234,0.2);
+        border: 1px solid rgba(102,126,234,0.4);
+        color: #a5b4fc;
+        padding: 4px 14px;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        margin-bottom: 12px;
+    }
+
+    .hero-title {
+        font-size: 2rem;
+        font-weight: 800;
+        line-height: 1.3;
+        margin-bottom: 16px;
+    }
+
+    .hero-meta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 20px;
+        color: rgba(255,255,255,0.6);
+        font-size: 0.85rem;
+        margin-bottom: 24px;
+    }
+
+    .hero-meta span {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .info-card {
+        background: white;
+        border-radius: 20px;
+        padding: 28px;
+        box-shadow: 0 8px 40px rgba(0,0,0,0.1);
+        border: none;
+    }
+
+    .price-tag {
+        font-size: 2.2rem;
+        font-weight: 800;
+        color: #667eea;
+        line-height: 1;
+    }
+
+    .price-tag.free {
+        color: #11998e;
+    }
+
+    .btn-enroll {
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        color: white;
+        border: none;
+        border-radius: 14px;
+        padding: 14px 20px;
+        font-size: 1rem;
+        font-weight: 700;
+        width: 100%;
+        cursor: pointer;
+        transition: all 0.3s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        text-decoration: none;
+    }
+
+    .btn-enroll:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(102,126,234,0.5);
+        color: white;
+    }
+
+    .btn-continue-learning {
+        background: linear-gradient(135deg, #11998e, #38ef7d);
+        color: #0f0e17;
+        border: none;
+        border-radius: 14px;
+        padding: 14px 20px;
+        font-size: 1rem;
+        font-weight: 700;
+        width: 100%;
+        cursor: pointer;
+        transition: all 0.3s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        text-decoration: none;
+    }
+
+    .btn-continue-learning:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(17,153,142,0.4);
+        color: #0f0e17;
+    }
+
+    .enrolled-badge {
+        background: rgba(17,153,142,0.1);
+        border: 1px solid rgba(17,153,142,0.3);
+        color: #11998e;
+        border-radius: 10px;
+        padding: 10px 16px;
+        text-align: center;
+        font-weight: 600;
+        font-size: 0.85rem;
+        margin-bottom: 12px;
+    }
+
+    .meta-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 10px 0;
+        border-bottom: 1px solid #f5f5f5;
+        font-size: 0.875rem;
+    }
+
+    .meta-row:last-child {
+        border-bottom: none;
+    }
+
+    .meta-label {
+        color: #9a9a9a;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .meta-value {
+        font-weight: 600;
+        color: #333;
+    }
+
+    /* Modules section */
+    .section-card {
+        background: white;
+        border-radius: 16px;
+        padding: 24px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+        margin-bottom: 20px;
+    }
+
+    .section-title {
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: #1a1a2e;
+        margin-bottom: 20px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .module-block {
+        border: 1px solid #f0f0f0;
+        border-radius: 12px;
+        overflow: hidden;
+        margin-bottom: 12px;
+    }
+
+    .module-head {
+        background: #f8f9ff;
+        padding: 14px 18px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        cursor: pointer;
+        transition: background 0.2s;
+    }
+
+    .module-head:hover {
+        background: #f0f4ff;
+    }
+
+    .module-head-title {
+        font-weight: 700;
+        color: #333;
+        font-size: 0.9rem;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .module-head-title i {
+        color: #667eea;
+    }
+
+    .module-actions {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .lesson-row {
+        display: flex;
+        align-items: center;
+        padding: 10px 18px 10px 42px;
+        border-top: 1px solid #f5f5f5;
+        font-size: 0.85rem;
+        color: #555;
+        gap: 10px;
+        transition: background 0.2s;
+    }
+
+    .lesson-row:hover {
+        background: #fafafa;
+    }
+
+    .lesson-row i {
+        color: #667eea;
+        font-size: 0.75rem;
+    }
+
+    .lesson-row-actions {
+        margin-left: auto;
+        display: flex;
+        gap: 6px;
+    }
+
+    .btn-action-sm {
+        padding: 4px 10px;
+        border-radius: 6px;
+        font-size: 0.72rem;
+        font-weight: 600;
+        border: none;
+        cursor: pointer;
+        transition: all 0.2s;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+    }
+
+    .btn-edit-sm {
+        background: rgba(102,126,234,0.1);
+        color: #667eea;
+    }
+
+    .btn-edit-sm:hover {
+        background: #667eea;
+        color: white;
+    }
+
+    .btn-delete-sm {
+        background: rgba(220,53,69,0.1);
+        color: #dc3545;
+    }
+
+    .btn-delete-sm:hover {
+        background: #dc3545;
+        color: white;
+    }
+
+    .btn-add-lesson {
+        background: rgba(79,172,254,0.1);
+        color: #4facfe;
+        border: 1px dashed #4facfe;
+        border-radius: 8px;
+        padding: 8px 16px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        transition: all 0.2s;
+    }
+
+    .btn-add-lesson:hover {
+        background: #4facfe;
+        color: white;
+    }
+
+    .btn-add-module {
+        background: rgba(17,153,142,0.1);
+        color: #11998e;
+        border: 2px dashed rgba(17,153,142,0.4);
+        border-radius: 12px;
+        padding: 14px 20px;
+        width: 100%;
+        font-size: 0.9rem;
+        font-weight: 600;
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        transition: all 0.3s;
+    }
+
+    .btn-add-module:hover {
+        background: #11998e;
+        color: white;
+        border-color: #11998e;
+    }
+
+    .badge-count {
+        background: rgba(102,126,234,0.1);
+        color: #667eea;
+        padding: 2px 10px;
+        border-radius: 20px;
+        font-size: 0.72rem;
+        font-weight: 600;
+    }
+
+    .instructor-card-inner {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        padding: 16px 0;
+    }
+
+    .instructor-avatar {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 1.2rem;
+        font-weight: 700;
+        flex-shrink: 0;
+    }
+
+    .empty-modules {
+        text-align: center;
+        padding: 40px;
+        color: #9a9a9a;
+    }
+
+    .module-lessons-body {
+        display: none;
+    }
+
+    .module-lessons-body.open {
+        display: block;
+    }
+
+    .module-expand-icon {
+        transition: transform 0.3s;
+        color: #9a9a9a;
+    }
+
+    .module-expand-icon.open {
+        transform: rotate(180deg);
+    }
+
+    .status-badge {
+        display: inline-block;
+        padding: 3px 10px;
+        border-radius: 20px;
+        font-size: 0.72rem;
+        font-weight: 600;
+    }
+
+    .status-active {
+        background: rgba(17,153,142,0.1);
+        color: #11998e;
+    }
+
+    .status-inactive {
+        background: rgba(220,53,69,0.1);
+        color: #dc3545;
+    }
+
+    .alert-enrolled {
+        background: rgba(102,126,234,0.05);
+        border: 1px solid rgba(102,126,234,0.2);
+        border-radius: 12px;
+        padding: 16px 20px;
+        color: #667eea;
+        font-size: 0.88rem;
+        margin-bottom: 14px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+</style>
+}
+
+<!-- Hero -->
+<div class="details-hero">
     <div class="container-xl">
-        <div class="d-flex justify-content-between align-items-start flex-wrap gap-3">
-            <div>
-                <h1 style="font-size:1.6rem;">@Model.Title</h1>
-                <nav aria-label="breadcrumb" class="mt-1">
-                    <ol class="breadcrumb">
-                        <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Trang chủ</a></li>
-                        <li class="breadcrumb-item"><a asp-action="Index">Khóa học</a></li>
-                        <li class="breadcrumb-item active">Chi tiết</li>
-                    </ol>
-                </nav>
-            </div>
-            @if (User.Identity.IsAuthenticated)
-            {
-                <div class="d-flex gap-2">
-                    <a asp-action="Edit" asp-route-id="@Model.Id" class="btn-success-custom">
-                        <i class="fas fa-pen"></i> Sửa
-                    </a>
-                    <a asp-action="Delete" asp-route-id="@Model.Id" class="btn-danger-custom">
-                        <i class="fas fa-trash"></i> Xóa
-                    </a>
+        <nav aria-label="breadcrumb" class="mb-3">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index" class="text-white-50">Trang chủ</a></li>
+                <li class="breadcrumb-item"><a asp-action="Index" class="text-white-50">Khóa học</a></li>
+                <li class="breadcrumb-item active text-white">Chi tiết</li>
+            </ol>
+        </nav>
+
+        <div class="row align-items-start g-4">
+            <div class="col-lg-8">
+                @if (Model.Category != null)
+                {
+                    <span class="course-badge-cat">
+                        <i class="fas fa-tag me-1"></i>@Model.Category.Name
+                    </span>
+                }
+                <h1 class="hero-title">@Model.Title</h1>
+                <div class="hero-meta">
+                    <span><i class="fas fa-chalkboard-teacher"></i>@(Model.Instructor?.FullName ?? Model.Instructor?.UserName ?? "N/A")</span>
+                    <span><i class="fas fa-users"></i>@(Model.CourseEnrollments?.Count ?? 0) học viên</span>
+                    <span><i class="fas fa-layer-group"></i>@totalModules chương</span>
+                    <span><i class="fas fa-file-alt"></i>@totalLessons bài học</span>
+                    <span class="status-badge @(Model.IsActive ? "status-active" : "status-inactive")">
+                        <i class="fas fa-circle me-1" style="font-size:0.5rem;"></i>@(Model.IsActive ? "Đang mở" : "Tạm dừng")
+                    </span>
                 </div>
-            }
+
+                @if (isInstructor)
+                {
+                    <div class="d-flex gap-2 flex-wrap">
+                        <a asp-action="Edit" asp-route-id="@Model.Id"
+                           class="btn btn-sm btn-outline-light rounded-pill px-3">
+                            <i class="fas fa-pen me-1"></i>Chỉnh sửa khóa học
+                        </a>
+                        <a asp-action="Delete" asp-route-id="@Model.Id"
+                           class="btn btn-sm btn-outline-danger rounded-pill px-3">
+                            <i class="fas fa-trash me-1"></i>Xóa
+                        </a>
+                    </div>
+                }
+            </div>
         </div>
     </div>
 </div>
 
-<div class="container-xl pb-5">
-    <div class="row g-4">
-        <!-- Main Info -->
-        <div class="col-lg-8">
-            <!-- Cover image -->
-            @if (!string.IsNullOrEmpty(Model.ImageUrl))
-            {
-                <div style="border-radius:var(--radius-lg); overflow:hidden; height:280px; margin-bottom:28px;">
-                    <img src="@Model.ImageUrl" alt="@Model.Title"
-                         style="width:100%; height:100%; object-fit:cover;" />
-                </div>
-            }
-            else
-            {
-                <div style="border-radius:var(--radius-lg); height:200px; background:linear-gradient(135deg,rgba(108,99,255,0.15),rgba(255,101,132,0.1)); display:flex;align-items:center;justify-content:center;margin-bottom:28px;border:1px solid var(--border-color);">
-                    <i class="fas fa-book-open" style="font-size:4rem; color:var(--primary-light); opacity:0.5;"></i>
-                </div>
-            }
+<div class="container-xl py-4">
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show rounded-3 mb-4" role="alert">
+            <i class="fas fa-check-circle me-2"></i>@TempData["Success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show rounded-3 mb-4" role="alert">
+            <i class="fas fa-exclamation-circle me-2"></i>@TempData["Error"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+    @if (TempData["Warning"] != null)
+    {
+        <div class="alert alert-warning alert-dismissible fade show rounded-3 mb-4" role="alert">
+            <i class="fas fa-exclamation-triangle me-2"></i>@TempData["Warning"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
 
+    <div class="row g-4">
+        <!-- Left: Description + Modules -->
+        <div class="col-lg-8">
             <!-- Description -->
-            <div class="form-dark mb-4">
-                <h5 style="font-weight:700; margin-bottom:14px; color:var(--text-primary);">
-                    <i class="fas fa-info-circle me-2" style="color:var(--primary-light)"></i>Mô tả khóa học
-                </h5>
-                <p style="color:var(--text-secondary); line-height:1.8;">
-                    @(string.IsNullOrEmpty(Model.Description) ? "Chưa có mô tả." : Model.Description)
+            <div class="section-card">
+                <div class="section-title">
+                    <i class="fas fa-info-circle" style="color:#667eea;"></i>Mô tả khóa học
+                </div>
+                <p style="color:#555; line-height:1.8; font-size:0.95rem;">
+                    @(string.IsNullOrEmpty(Model.Description) ? "Chưa có mô tả cho khóa học này." : Model.Description)
                 </p>
             </div>
 
             <!-- Modules & Lessons -->
-            <div class="form-dark">
-                <h5 style="font-weight:700; margin-bottom:20px; color:var(--text-primary);">
-                    <i class="fas fa-list me-2" style="color:var(--primary-light)"></i>
-                    Nội dung khóa học
-                    <span class="badge-category ms-2">@totalModules chương · @totalLessons bài học</span>
-                </h5>
+            <div class="section-card">
+                <div class="section-title d-flex justify-content-between align-items-center flex-wrap gap-2">
+                    <span>
+                        <i class="fas fa-list" style="color:#667eea;"></i>
+                        Nội dung khóa học
+                        <span class="badge-count ms-2">@totalModules chương · @totalLessons bài</span>
+                    </span>
+                    @if (isInstructor)
+                    {
+                        <a asp-controller="Modules" asp-action="Create" asp-route-courseId="@Model.Id"
+                           class="btn btn-sm btn-success rounded-pill px-3">
+                            <i class="fas fa-plus me-1"></i>Thêm Module
+                        </a>
+                    }
+                </div>
 
                 @if (Model.Modules != null && Model.Modules.Any())
                 {
-                    <div class="accordion-modules">
-                        @foreach (var module in Model.Modules.OrderBy(m => m.Order))
-                        {
-                            <div class="module-item mb-3">
-                                <div class="module-header" style="background:var(--bg-surface2); border-radius:10px; padding:14px 18px; border:1px solid var(--border-color);">
-                                    <div class="d-flex justify-content-between align-items-center">
-                                        <div>
-                                            <span style="font-weight:700; color:var(--text-primary);">
-                                                <i class="fas fa-folder me-2" style="color:var(--primary-light)"></i>
-                                                Chương @module.Order: @module.Title
-                                            </span>
-                                        </div>
-                                        <span class="badge-category">@(module.Lessons?.Count ?? 0) bài</span>
-                                    </div>
+                    foreach (var module in Model.Modules.OrderBy(m => m.Order))
+                    {
+                        <div class="module-block">
+                            <div class="module-head" onclick="toggleModule('@module.Id')">
+                                <div class="module-head-title">
+                                    <i class="fas fa-folder"></i>
+                                    Chương @module.Order: @module.Title
+                                    <span class="badge-count">@(module.Lessons?.Count ?? 0) bài</span>
                                 </div>
+                                <div class="module-actions" onclick="event.stopPropagation()">
+                                    @if (isInstructor)
+                                    {
+                                        <a asp-controller="Lessons" asp-action="Create" asp-route-moduleId="@module.Id"
+                                           class="btn-action-sm btn-edit-sm">
+                                            <i class="fas fa-plus"></i>Bài học
+                                        </a>
+                                        <a asp-controller="Modules" asp-action="Edit" asp-route-id="@module.Id"
+                                           class="btn-action-sm btn-edit-sm">
+                                            <i class="fas fa-pen"></i>
+                                        </a>
+                                        <form asp-controller="Modules" asp-action="Delete" method="post" class="d-inline"
+                                              onsubmit="return confirm('Xóa module này và toàn bộ bài học?')">
+                                            @Html.AntiForgeryToken()
+                                            <input type="hidden" name="id" value="@module.Id" />
+                                            <button type="submit" class="btn-action-sm btn-delete-sm">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </form>
+                                    }
+                                    <i class="fas fa-chevron-down module-expand-icon" id="icon-@module.Id"></i>
+                                </div>
+                            </div>
+
+                            <div class="module-lessons-body" id="body-@module.Id">
                                 @if (module.Lessons != null && module.Lessons.Any())
                                 {
-                                    <div class="module-lessons mt-2 ps-3">
-                                        @foreach (var lesson in module.Lessons.OrderBy(l => l.Id))
-                                        {
-                                            <div class="lesson-item d-flex align-items-center gap-3"
-                                                 style="padding:10px 14px; border-bottom:1px solid var(--border-color);">
-                                                <i class="fas fa-play-circle" style="color:var(--primary-light); font-size:0.85rem;"></i>
-                                                <span style="color:var(--text-secondary); font-size:0.875rem;">@lesson.Title</span>
-                                            </div>
-                                        }
+                                    foreach (var lesson in module.Lessons.OrderBy(l => l.Order))
+                                    {
+                                        <div class="lesson-row">
+                                            <i class="fas fa-play-circle"></i>
+                                            <span>@lesson.Title</span>
+                                            @if (!string.IsNullOrEmpty(lesson.VideoUrl))
+                                            {
+                                                <i class="fab fa-youtube text-danger" title="Có video"></i>
+                                            }
+                                            @if (isInstructor)
+                                            {
+                                                <div class="lesson-row-actions">
+                                                    <a asp-controller="Lessons" asp-action="Edit" asp-route-id="@lesson.Id"
+                                                       class="btn-action-sm btn-edit-sm">
+                                                        <i class="fas fa-pen"></i>
+                                                    </a>
+                                                    <form asp-controller="Lessons" asp-action="Delete" method="post" class="d-inline"
+                                                          onsubmit="return confirm('Xóa bài học này?')">
+                                                        @Html.AntiForgeryToken()
+                                                        <input type="hidden" name="id" value="@lesson.Id" />
+                                                        <button type="submit" class="btn-action-sm btn-delete-sm">
+                                                            <i class="fas fa-trash"></i>
+                                                        </button>
+                                                    </form>
+                                                </div>
+                                            }
+                                        </div>
+                                    }
+                                }
+                                else
+                                {
+                                    <div style="padding:16px 42px; color:#9a9a9a; font-size:0.85rem; font-style:italic;">
+                                        Chưa có bài học. @if (isInstructor) { <text><a asp-controller="Lessons" asp-action="Create" asp-route-moduleId="@module.Id">Thêm bài học</a></text> }
                                     </div>
                                 }
                             </div>
+                        </div>
+                    }
+
+                    @if (isInstructor)
+                    {
+                        <a asp-controller="Modules" asp-action="Create" asp-route-courseId="@Model.Id"
+                           class="btn-add-module mt-2">
+                            <i class="fas fa-plus-circle"></i>Thêm chương mới
+                        </a>
+                    }
+                }
+                else
+                {
+                    <div class="empty-modules">
+                        <i class="fas fa-layer-group" style="font-size:2.5rem; margin-bottom:12px; color:#dee2e6;"></i>
+                        <p class="mb-3">Chưa có nội dung khóa học.</p>
+                        @if (isInstructor)
+                        {
+                            <a asp-controller="Modules" asp-action="Create" asp-route-courseId="@Model.Id"
+                               class="btn-add-module" style="max-width:300px; margin:0 auto;">
+                                <i class="fas fa-plus-circle"></i>Thêm module đầu tiên
+                            </a>
                         }
                     </div>
                 }
-                else
-                {
-                    <div class="empty-state" style="padding:30px;">
-                        <i class="fas fa-layer-group" style="font-size:2rem;"></i>
-                        <p class="mt-2" style="font-size:0.875rem;">Chưa có nội dung được thêm vào.</p>
-                    </div>
-                }
             </div>
         </div>
 
-        <!-- Sidebar -->
+        <!-- Right: Price Card + Meta -->
         <div class="col-lg-4">
-            <!-- Price & Enroll Card -->
-            <div class="form-dark mb-4" style="position:sticky; top:90px;">
-                <div class="text-center mb-4">
-                    <div class="course-price @(Model.Price == 0 ? "free" : "")" style="font-size:2rem;">
-                        @(Model.Price == 0 ? "Miễn phí" : Model.Price.ToString("N0") + " ₫")
-                    </div>
-                    <span class="@(Model.IsActive ? "badge-active" : "badge-inactive") mt-2 d-inline-block">
-                        @(Model.IsActive ? "Đang mở" : "Tạm dừng")
-                    </span>
-                </div>
-
-                @if (User.Identity.IsAuthenticated)
+            <div style="position:sticky; top:90px;">
+                <!-- Course Image -->
+                @if (!string.IsNullOrEmpty(Model.ImageUrl))
                 {
-                    if (ViewBag.IsEnrolled == true)
-                    {
-                        <div class="alert-dark alert-success text-center mb-3">
-                            <i class="fas fa-check-circle me-2"></i> Bạn đã đăng ký khóa học này
+                    <div style="border-radius:16px; overflow:hidden; height:180px; margin-bottom:20px;">
+                        <img src="@Model.ImageUrl" alt="@Model.Title" style="width:100%; height:100%; object-fit:cover;" />
+                    </div>
+                }
+
+                <!-- Price + Enroll Card -->
+                <div class="info-card mb-3">
+                    <div class="text-center mb-4">
+                        <div class="price-tag @(Model.Price == 0 ? "free" : "")">
+                            @(Model.Price == 0 ? "Miễn phí" : Model.Price.ToString("N0") + " ₫")
                         </div>
-                    }
-                    else if (Model.IsActive)
-                    {
-                        <form asp-controller="Enrollments" asp-action="Enroll" method="post">
-                            <input type="hidden" name="courseId" value="@Model.Id" />
-                            <button type="submit" class="btn-primary-custom w-100 justify-content-center" style="padding:13px;">
-                                <i class="fas fa-user-plus"></i> Đăng ký ngay
-                            </button>
-                        </form>
-                    }
-                }
-                else
-                {
-                    <a asp-area="Identity" asp-page="/Account/Login" class="btn-primary-custom w-100 justify-content-center" style="padding:13px;">
-                        <i class="fas fa-sign-in-alt"></i> Đăng nhập để đăng ký
-                    </a>
-                }
+                    </div>
 
-                <!-- Course Meta -->
-                <div class="mt-4" style="border-top:1px solid var(--border-color); padding-top:20px;">
-                    <div class="d-flex justify-content-between mb-3">
-                        <span style="color:var(--text-secondary); font-size:0.875rem;"><i class="fas fa-tags me-2"></i>Danh mục</span>
-                        <a asp-controller="Categories" asp-action="Details" asp-route-id="@Model.CategoryId"
-                           class="badge-category" style="text-decoration:none;">@Model.Category?.Name</a>
-                    </div>
-                    <div class="d-flex justify-content-between mb-3">
-                        <span style="color:var(--text-secondary); font-size:0.875rem;"><i class="fas fa-chalkboard-teacher me-2"></i>Giảng viên</span>
-                        <span style="color:var(--text-primary); font-size:0.875rem; font-weight:600;">@(Model.Instructor?.FullName ?? Model.Instructor?.UserName ?? "N/A")</span>
-                    </div>
-                    <div class="d-flex justify-content-between mb-3">
-                        <span style="color:var(--text-secondary); font-size:0.875rem;"><i class="fas fa-calendar me-2"></i>Bắt đầu</span>
-                        <span style="color:var(--text-primary); font-size:0.875rem;">@Model.StartDate.ToString("dd/MM/yyyy")</span>
-                    </div>
-                    <div class="d-flex justify-content-between mb-3">
-                        <span style="color:var(--text-secondary); font-size:0.875rem;"><i class="fas fa-calendar-check me-2"></i>Kết thúc</span>
-                        <span style="color:var(--text-primary); font-size:0.875rem;">@Model.EndDate.ToString("dd/MM/yyyy")</span>
-                    </div>
-                    <div class="d-flex justify-content-between mb-3">
-                        <span style="color:var(--text-secondary); font-size:0.875rem;"><i class="fas fa-users me-2"></i>Học viên</span>
-                        <span style="color:var(--text-primary); font-size:0.875rem; font-weight:600;">@(Model.CourseEnrollments?.Count ?? 0)</span>
-                    </div>
-                    <div class="d-flex justify-content-between">
-                        <span style="color:var(--text-secondary); font-size:0.875rem;"><i class="fas fa-layer-group me-2"></i>Bài học</span>
-                        <span style="color:var(--text-primary); font-size:0.875rem; font-weight:600;">@totalLessons</span>
+                    @if (User.Identity.IsAuthenticated)
+                    {
+                        if (ViewBag.IsEnrolled == true)
+                        {
+                            <div class="alert-enrolled">
+                                <i class="fas fa-check-circle fa-lg"></i>
+                                <span>Bạn đã đăng ký khóa học này</span>
+                            </div>
+                            <a asp-controller="Enrollments" asp-action="Learn" asp-route-courseId="@Model.Id"
+                               class="btn-continue-learning">
+                                <i class="fas fa-play-circle"></i>Tiếp tục học
+                            </a>
+                        }
+                        else if (Model.IsActive && !isInstructor)
+                        {
+                            <form asp-controller="Enrollments" asp-action="Enroll" method="post">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="courseId" value="@Model.Id" />
+                                <button type="submit" class="btn-enroll">
+                                    <i class="fas fa-user-plus"></i>Đăng ký ngay - Miễn phí
+                                </button>
+                            </form>
+                        }
+                        else if (isInstructor)
+                        {
+                            <div style="background:#f8f9ff; border-radius:10px; padding:14px; text-align:center; font-size:0.85rem; color:#667eea; font-weight:600;">
+                                <i class="fas fa-chalkboard-teacher me-2"></i>Bạn là giảng viên khóa học này
+                            </div>
+                        }
+                        else
+                        {
+                            <div style="background:#fff3cd; border-radius:10px; padding:14px; text-align:center; font-size:0.85rem; color:#856404;">
+                                <i class="fas fa-pause-circle me-2"></i>Khóa học đang tạm dừng
+                            </div>
+                        }
+                    }
+                    else
+                    {
+                        <a asp-controller="Account" asp-action="Login" class="btn-enroll">
+                            <i class="fas fa-sign-in-alt"></i>Đăng nhập để đăng ký
+                        </a>
+                    }
+
+                    <!-- Course Meta -->
+                    <div class="mt-4" style="border-top:1px solid #f0f0f0; padding-top:16px;">
+                        <div class="meta-row">
+                            <span class="meta-label"><i class="fas fa-tags"></i>Danh mục</span>
+                            <span class="meta-value" style="color:#667eea;">@Model.Category?.Name</span>
+                        </div>
+                        <div class="meta-row">
+                            <span class="meta-label"><i class="fas fa-calendar"></i>Bắt đầu</span>
+                            <span class="meta-value">@Model.StartDate.ToString("dd/MM/yyyy")</span>
+                        </div>
+                        <div class="meta-row">
+                            <span class="meta-label"><i class="fas fa-calendar-check"></i>Kết thúc</span>
+                            <span class="meta-value">@Model.EndDate.ToString("dd/MM/yyyy")</span>
+                        </div>
+                        <div class="meta-row">
+                            <span class="meta-label"><i class="fas fa-users"></i>Học viên</span>
+                            <span class="meta-value">@(Model.CourseEnrollments?.Count ?? 0)</span>
+                        </div>
+                        <div class="meta-row">
+                            <span class="meta-label"><i class="fas fa-layer-group"></i>Bài học</span>
+                            <span class="meta-value">@totalLessons</span>
+                        </div>
                     </div>
                 </div>
-            </div>
 
-            <a asp-action="Index" class="btn-outline-custom w-100 justify-content-center">
-                <i class="fas fa-arrow-left"></i> Quay lại danh sách
-            </a>
+                <!-- Instructor Card -->
+                <div class="info-card">
+                    <div class="section-title" style="font-size:0.9rem; margin-bottom:0;">
+                        <i class="fas fa-chalkboard-teacher" style="color:#667eea;"></i>Giảng viên
+                    </div>
+                    <div class="instructor-card-inner">
+                        <div class="instructor-avatar">
+                            @(Model.Instructor?.FullName?.FirstOrDefault().ToString() ?? "?")
+                        </div>
+                        <div>
+                            <div style="font-weight:700; color:#333;">@(Model.Instructor?.FullName ?? Model.Instructor?.UserName ?? "N/A")</div>
+                            <div style="font-size:0.8rem; color:#9a9a9a;">@Model.Instructor?.Email</div>
+                        </div>
+                    </div>
+                </div>
+
+                <a asp-action="Index" class="d-flex align-items-center gap-2 justify-content-center mt-3"
+                   style="color:#9a9a9a; font-size:0.85rem; text-decoration:none; padding:10px;">
+                    <i class="fas fa-arrow-left"></i>Quay lại danh sách
+                </a>
+            </div>
         </div>
     </div>
 </div>
+
+@section Scripts {
+<script>
+    function toggleModule(id) {
+        const body = document.getElementById('body-' + id);
+        const icon = document.getElementById('icon-' + id);
+        body.classList.toggle('open');
+        icon.classList.toggle('open');
+    }
+
+    // Auto-open first module
+    document.addEventListener('DOMContentLoaded', function () {
+        const firstBody = document.querySelector('.module-lessons-body');
+        const firstIcon = document.querySelector('.module-expand-icon');
+        if (firstBody) firstBody.classList.add('open');
+        if (firstIcon) firstIcon.classList.add('open');
+    });
+</script>
+}

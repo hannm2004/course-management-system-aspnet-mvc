@@ -1,0 +1,495 @@
+@{
+    ViewData["Title"] = "Học bài - " + (ViewBag.Course as CourseManagement.Models.Course)?.Title;
+    var course = ViewBag.Course as CourseManagement.Models.Course;
+    var currentLesson = ViewBag.CurrentLesson as CourseManagement.Models.Lesson;
+    var completedIds = ViewBag.CompletedLessonIds as List<int> ?? new List<int>();
+    var totalLessons = (int)(ViewBag.TotalLessons ?? 0);
+    var completedCount = (int)(ViewBag.CompletedCount ?? 0);
+    var enrollment = ViewBag.Enrollment as CourseManagement.Models.CourseEnrollment;
+    var progress = totalLessons > 0 ? Math.Round((decimal)completedCount / totalLessons * 100, 1) : 0;
+}
+
+@section Styles {
+<style>
+    body { background: #0f0e17; }
+
+    .learn-wrapper {
+        display: grid;
+        grid-template-columns: 320px 1fr;
+        min-height: calc(100vh - 70px);
+        margin-top: 70px;
+    }
+
+    /* Sidebar */
+    .course-sidebar {
+        background: #1a1a2e;
+        border-right: 1px solid rgba(255,255,255,0.08);
+        overflow-y: auto;
+        position: sticky;
+        top: 70px;
+        height: calc(100vh - 70px);
+    }
+
+    .sidebar-header {
+        padding: 20px;
+        border-bottom: 1px solid rgba(255,255,255,0.08);
+        background: rgba(102,126,234,0.1);
+    }
+
+    .sidebar-course-title {
+        font-size: 0.9rem;
+        font-weight: 700;
+        color: white;
+        margin-bottom: 12px;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    .sidebar-progress {
+        background: rgba(255,255,255,0.1);
+        border-radius: 10px;
+        height: 6px;
+        overflow: hidden;
+    }
+
+    .sidebar-progress-fill {
+        height: 100%;
+        border-radius: 10px;
+        background: linear-gradient(90deg, #667eea, #764ba2);
+    }
+
+    .sidebar-progress-text {
+        font-size: 0.75rem;
+        color: rgba(255,255,255,0.6);
+        margin-top: 6px;
+        display: flex;
+        justify-content: space-between;
+    }
+
+    .module-item {
+        border-bottom: 1px solid rgba(255,255,255,0.05);
+    }
+
+    .module-header {
+        padding: 14px 20px;
+        color: rgba(255,255,255,0.7);
+        font-size: 0.8rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        background: rgba(255,255,255,0.03);
+        cursor: pointer;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .module-header:hover {
+        background: rgba(255,255,255,0.06);
+    }
+
+    .lesson-link {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 10px 20px 10px 30px;
+        color: rgba(255,255,255,0.6);
+        text-decoration: none;
+        font-size: 0.82rem;
+        transition: all 0.2s;
+        border-left: 3px solid transparent;
+    }
+
+    .lesson-link:hover {
+        background: rgba(102,126,234,0.1);
+        color: white;
+        border-left-color: rgba(102,126,234,0.5);
+    }
+
+    .lesson-link.active {
+        background: rgba(102,126,234,0.15);
+        color: white;
+        border-left-color: #667eea;
+        font-weight: 600;
+    }
+
+    .lesson-icon {
+        width: 22px;
+        height: 22px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.65rem;
+        flex-shrink: 0;
+    }
+
+    .lesson-icon.done {
+        background: linear-gradient(135deg, #11998e, #38ef7d);
+        color: white;
+    }
+
+    .lesson-icon.current {
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        color: white;
+    }
+
+    .lesson-icon.todo {
+        background: rgba(255,255,255,0.1);
+        color: rgba(255,255,255,0.4);
+    }
+
+    /* Main content */
+    .learn-main {
+        background: #0f0e17;
+        padding: 0;
+        overflow-y: auto;
+    }
+
+    .video-area {
+        background: black;
+        position: relative;
+        padding-top: 56.25%;
+    }
+
+    .video-placeholder {
+        position: absolute;
+        top: 0; left: 0; right: 0; bottom: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+        color: white;
+    }
+
+    .video-play-btn {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        background: rgba(102,126,234,0.2);
+        border: 3px solid #667eea;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2rem;
+        color: #667eea;
+        margin-bottom: 16px;
+    }
+
+    .content-area {
+        padding: 32px 40px;
+        max-width: 900px;
+    }
+
+    .lesson-title-main {
+        font-size: 1.6rem;
+        font-weight: 800;
+        color: white;
+        margin-bottom: 8px;
+    }
+
+    .lesson-meta {
+        color: rgba(255,255,255,0.4);
+        font-size: 0.82rem;
+        margin-bottom: 24px;
+        display: flex;
+        align-items: center;
+        gap: 16px;
+    }
+
+    .lesson-content-body {
+        color: rgba(255,255,255,0.75);
+        line-height: 1.8;
+        font-size: 0.95rem;
+    }
+
+    .mark-complete-btn {
+        background: linear-gradient(135deg, #11998e, #38ef7d);
+        color: white;
+        border: none;
+        border-radius: 12px;
+        padding: 14px 32px;
+        font-size: 1rem;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.3s;
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .mark-complete-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(17,153,142,0.4);
+    }
+
+    .already-done-badge {
+        background: rgba(17,153,142,0.15);
+        color: #38ef7d;
+        border: 1px solid rgba(56,239,125,0.3);
+        border-radius: 12px;
+        padding: 12px 24px;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .nav-lessons {
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+    }
+
+    .btn-nav-lesson {
+        background: rgba(255,255,255,0.08);
+        color: rgba(255,255,255,0.7);
+        border: 1px solid rgba(255,255,255,0.1);
+        border-radius: 10px;
+        padding: 10px 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        transition: all 0.3s;
+    }
+
+    .btn-nav-lesson:hover {
+        background: rgba(102,126,234,0.15);
+        color: white;
+        border-color: rgba(102,126,234,0.4);
+    }
+
+    .divider-lesson {
+        height: 1px;
+        background: rgba(255,255,255,0.06);
+        margin: 28px 0;
+    }
+
+    .empty-lesson-state {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        min-height: 60vh;
+        color: rgba(255,255,255,0.4);
+        text-align: center;
+        padding: 40px;
+    }
+
+    .module-lessons {
+        display: block;
+    }
+    .module-lessons.collapsed {
+        display: none;
+    }
+</style>
+}
+
+<div class="learn-wrapper">
+    <!-- Sidebar -->
+    <aside class="course-sidebar">
+        <div class="sidebar-header">
+            <div class="sidebar-course-title">@course?.Title</div>
+            <div class="sidebar-progress">
+                <div class="sidebar-progress-fill" style="width:@progress%"></div>
+            </div>
+            <div class="sidebar-progress-text">
+                <span>@completedCount / @totalLessons bài</span>
+                <span>@progress%</span>
+            </div>
+        </div>
+
+        @if (course?.Modules != null)
+        {
+            foreach (var module in course.Modules.OrderBy(m => m.Order))
+            {
+                var moduleLessons = module.Lessons?.OrderBy(l => l.Order).ToList() ?? new();
+                var moduleCompleted = moduleLessons.All(l => completedIds.Contains(l.Id));
+
+                <div class="module-item">
+                    <div class="module-header" onclick="toggleModule('mod-@module.Id')">
+                        <span>
+                            @if (moduleCompleted && moduleLessons.Any())
+                            {
+                                <i class="fas fa-check-circle text-success me-1"></i>
+                            }
+                            Chương @module.Order: @module.Title
+                        </span>
+                        <i class="fas fa-chevron-down" id="arrow-mod-@module.Id"></i>
+                    </div>
+                    <div id="mod-@module.Id" class="module-lessons">
+                        @foreach (var lesson in moduleLessons)
+                        {
+                            var isDone = completedIds.Contains(lesson.Id);
+                            var isCurrent = currentLesson?.Id == lesson.Id;
+                            var iconClass = isDone ? "done" : (isCurrent ? "current" : "todo");
+                            var iconTag = isDone ? "fa-check" : (isCurrent ? "fa-play" : "fa-circle");
+
+                            <a asp-action="Learn" asp-route-courseId="@course.Id" asp-route-lessonId="@lesson.Id"
+                               class="lesson-link @(isCurrent ? "active" : "")">
+                                <span class="lesson-icon @iconClass">
+                                    <i class="fas @iconTag"></i>
+                                </span>
+                                <span>@lesson.Title</span>
+                            </a>
+                        }
+                    </div>
+                </div>
+            }
+        }
+    </aside>
+
+    <!-- Main Content -->
+    <main class="learn-main">
+        @if (currentLesson == null)
+        {
+            <div class="empty-lesson-state">
+                <i class="fas fa-book-open" style="font-size:3rem; margin-bottom:16px;"></i>
+                <h3>Khóa học chưa có bài học</h3>
+                <p>Hãy quay lại sau khi giảng viên thêm nội dung.</p>
+            </div>
+        }
+        else
+        {
+            <!-- Video -->
+            @if (!string.IsNullOrEmpty(currentLesson.VideoUrl))
+            {
+                <div class="video-area">
+                    @{
+                        // Convert YouTube watch URL to embed URL
+                        var videoUrl = currentLesson.VideoUrl;
+                        if (videoUrl.Contains("youtube.com/watch?v="))
+                        {
+                            var videoId = videoUrl.Split("v=")[1].Split("&")[0];
+                            videoUrl = $"https://www.youtube.com/embed/{videoId}";
+                        }
+                        else if (videoUrl.Contains("youtu.be/"))
+                        {
+                            var videoId = videoUrl.Split("youtu.be/")[1].Split("?")[0];
+                            videoUrl = $"https://www.youtube.com/embed/{videoId}";
+                        }
+                    }
+                    <iframe src="@videoUrl" style="position:absolute;top:0;left:0;width:100%;height:100%;border:none;"
+                            allowfullscreen allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"></iframe>
+                </div>
+            }
+            else
+            {
+                <div class="video-area">
+                    <div class="video-placeholder">
+                        <div class="video-play-btn">
+                            <i class="fas fa-book-reader"></i>
+                        </div>
+                        <p style="color:rgba(255,255,255,0.5); font-size:0.9rem;">Bài học dạng văn bản</p>
+                    </div>
+                </div>
+            }
+
+            <div class="content-area">
+                <!-- Lesson Header -->
+                <h1 class="lesson-title-main">@currentLesson.Title</h1>
+                <div class="lesson-meta">
+                    <span><i class="fas fa-layer-group me-1"></i>@(course?.Modules?.FirstOrDefault(m => m.Id == currentLesson.ModuleId)?.Title ?? "Module")</span>
+                    <span><i class="fas fa-sort-numeric-up me-1"></i>Bài @currentLesson.Order</span>
+                    @if (completedIds.Contains(currentLesson.Id))
+                    {
+                        <span style="color:#38ef7d;"><i class="fas fa-check-circle me-1"></i>Đã hoàn thành</span>
+                    }
+                </div>
+
+                <div class="divider-lesson"></div>
+
+                <!-- Lesson Content -->
+                @if (!string.IsNullOrEmpty(currentLesson.Content))
+                {
+                    <div class="lesson-content-body">
+                        @Html.Raw(currentLesson.Content.Replace("\n", "<br/>"))
+                    </div>
+                    <div class="divider-lesson"></div>
+                }
+
+                <!-- Mark Complete -->
+                <div class="mb-4">
+                    @if (completedIds.Contains(currentLesson.Id))
+                    {
+                        <div class="already-done-badge">
+                            <i class="fas fa-check-circle"></i>Bạn đã hoàn thành bài học này
+                        </div>
+                    }
+                    else
+                    {
+                        <form asp-action="MarkComplete" method="post">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="lessonId" value="@currentLesson.Id" />
+                            <input type="hidden" name="courseId" value="@course?.Id" />
+                            <button type="submit" class="mark-complete-btn">
+                                <i class="fas fa-check-circle"></i>Đánh dấu hoàn thành
+                            </button>
+                        </form>
+                    }
+                </div>
+
+                <div class="divider-lesson"></div>
+
+                <!-- Navigation -->
+                @{
+                    var allLessons = course?.Modules?.OrderBy(m => m.Order).SelectMany(m => m.Lessons.OrderBy(l => l.Order)).ToList() ?? new();
+                    var currentIndex = allLessons.FindIndex(l => l.Id == currentLesson.Id);
+                    var prevLesson = currentIndex > 0 ? allLessons[currentIndex - 1] : null;
+                    var nextLesson = currentIndex < allLessons.Count - 1 ? allLessons[currentIndex + 1] : null;
+                }
+
+                <div class="nav-lessons">
+                    @if (prevLesson != null)
+                    {
+                        <a asp-action="Learn" asp-route-courseId="@course?.Id" asp-route-lessonId="@prevLesson.Id"
+                           class="btn-nav-lesson">
+                            <i class="fas fa-arrow-left"></i>Bài trước
+                        </a>
+                    }
+                    <a asp-controller="Courses" asp-action="Details" asp-route-id="@course?.Id"
+                       class="btn-nav-lesson">
+                        <i class="fas fa-th-list"></i>Chi tiết khóa học
+                    </a>
+                    @if (nextLesson != null)
+                    {
+                        <a asp-action="Learn" asp-route-courseId="@course?.Id" asp-route-lessonId="@nextLesson.Id"
+                           class="btn-nav-lesson">
+                            Bài tiếp<i class="fas fa-arrow-right"></i>
+                        </a>
+                    }
+                </div>
+            </div>
+        }
+    </main>
+</div>
+
+@section Scripts {
+<script>
+    function toggleModule(id) {
+        const el = document.getElementById(id);
+        const arrowId = 'arrow-' + id;
+        const arrow = document.getElementById(arrowId);
+        el.classList.toggle('collapsed');
+        if (el.classList.contains('collapsed')) {
+            arrow.style.transform = 'rotate(-90deg)';
+        } else {
+            arrow.style.transform = 'rotate(0deg)';
+        }
+    }
+
+    // Auto-scroll sidebar to active lesson
+    document.addEventListener('DOMContentLoaded', function () {
+        const activeLink = document.querySelector('.lesson-link.active');
+        if (activeLink) {
+            activeLink.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+    });
+</script>
+}
