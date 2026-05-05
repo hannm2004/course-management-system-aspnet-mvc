@@ -1,0 +1,170 @@
+@model CourseManagement.Models.Lesson
+@{
+    ViewData["Title"] = "Thêm Bài học";
+    var module = ViewBag.Module as CourseManagement.Models.Module;
+    var nextOrder = (int)(ViewBag.NextOrder ?? 1);
+}
+
+@section Styles {
+<style>
+    .form-hero {
+        background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        padding: 50px 0 30px;
+        color: white;
+        margin-top: -1px;
+    }
+
+    .form-card {
+        background: white;
+        border-radius: 20px;
+        padding: 36px;
+        box-shadow: 0 8px 40px rgba(0,0,0,0.08);
+        margin-top: -30px;
+        position: relative;
+        z-index: 1;
+    }
+
+    .form-label-custom {
+        font-weight: 600;
+        font-size: 0.85rem;
+        color: #555;
+        margin-bottom: 6px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .form-control-custom {
+        border: 2px solid #f0f0f0;
+        border-radius: 12px;
+        padding: 12px 16px;
+        font-size: 0.95rem;
+        transition: border-color 0.3s;
+    }
+
+    .form-control-custom:focus {
+        border-color: #4facfe;
+        box-shadow: 0 0 0 3px rgba(79,172,254,0.1);
+    }
+
+    .btn-submit-custom {
+        background: linear-gradient(135deg, #4facfe, #00f2fe);
+        border: none;
+        color: #0f0e17;
+        font-weight: 700;
+        padding: 13px 32px;
+        border-radius: 12px;
+        font-size: 0.95rem;
+        transition: all 0.3s;
+    }
+
+    .btn-submit-custom:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(79,172,254,0.4);
+    }
+
+    .module-info-box {
+        background: linear-gradient(135deg, #f0faff, #e0f7ff);
+        border: 1px solid #b3e5fc;
+        border-radius: 12px;
+        padding: 16px 20px;
+        margin-bottom: 24px;
+    }
+
+    .char-counter {
+        font-size: 0.75rem;
+        color: #9a9a9a;
+        text-align: right;
+    }
+</style>
+}
+
+<div class="form-hero">
+    <div class="container-xl">
+        <nav aria-label="breadcrumb" class="mb-2">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item">
+                    <a asp-controller="Courses" asp-action="Details" asp-route-id="@module?.CourseId" class="text-white-50">Khóa học</a>
+                </li>
+                <li class="breadcrumb-item text-white-50">@module?.Title</li>
+                <li class="breadcrumb-item active text-white">Thêm Bài học</li>
+            </ol>
+        </nav>
+        <h1 class="fw-800 mb-0" style="font-size:1.8rem;">
+            <i class="fas fa-file-alt me-2"></i>Thêm Bài học mới
+        </h1>
+    </div>
+</div>
+
+<div class="container-xl py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="form-card">
+                <div class="module-info-box">
+                    <small class="text-muted d-block mb-1">Module:</small>
+                    <strong style="color:#4facfe;">Chương @module?.Order: @module?.Title</strong>
+                </div>
+
+                <form asp-action="Create" method="post">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" asp-for="ModuleId" />
+
+                    <div class="mb-4">
+                        <label class="form-label-custom">Tiêu đề bài học <span class="text-danger">*</span></label>
+                        <input asp-for="Title" class="form-control form-control-custom"
+                               placeholder="Ví dụ: Bài 1: Cài đặt Visual Studio Code" />
+                        <span asp-validation-for="Title" class="text-danger small"></span>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label-custom">Video URL <small class="text-muted text-lowercase">(YouTube, v.v.)</small></label>
+                        <div class="input-group">
+                            <span class="input-group-text" style="border-radius:12px 0 0 12px; border:2px solid #f0f0f0; border-right:none;">
+                                <i class="fab fa-youtube text-danger"></i>
+                            </span>
+                            <input asp-for="VideoUrl" class="form-control form-control-custom"
+                                   style="border-radius:0 12px 12px 0; border-left:none;"
+                                   placeholder="https://www.youtube.com/watch?v=..." />
+                        </div>
+                        <span asp-validation-for="VideoUrl" class="text-danger small"></span>
+                        <div class="form-text">Hỗ trợ YouTube, hoặc để trống nếu chỉ có nội dung văn bản</div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label-custom">Nội dung bài học</label>
+                        <textarea asp-for="Content" class="form-control form-control-custom" rows="8"
+                                  placeholder="Nhập nội dung, giải thích, ghi chú cho bài học này..."
+                                  id="lessonContent"></textarea>
+                        <div class="char-counter"><span id="charCount">0</span> ký tự</div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label-custom">Thứ tự <span class="text-danger">*</span></label>
+                        <input asp-for="Order" class="form-control form-control-custom" type="number" value="@nextOrder" min="1" />
+                        <span asp-validation-for="Order" class="text-danger small"></span>
+                    </div>
+
+                    <div class="d-flex gap-3 justify-content-end">
+                        <a asp-controller="Courses" asp-action="Details" asp-route-id="@module?.CourseId"
+                           class="btn btn-outline-secondary px-4 rounded-3">Hủy</a>
+                        <button type="submit" class="btn-submit-custom">
+                            <i class="fas fa-plus me-2"></i>Thêm Bài học
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    <script>
+        const content = document.getElementById('lessonContent');
+        const counter = document.getElementById('charCount');
+        if (content && counter) {
+            content.addEventListener('input', () => {
+                counter.textContent = content.value.length;
+            });
+        }
+    </script>
+}
