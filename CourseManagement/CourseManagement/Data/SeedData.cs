@@ -234,6 +234,32 @@ namespace CourseManagement.Data
 
                 await context.Courses.AddRangeAsync(course1, course2, course3);
                 await context.SaveChangesAsync();
+
+                // ── 7. Demo Enrollments ──────────────────────────────────
+                if (!await context.CourseEnrollments.AnyAsync())
+                {
+                    var enrollments = new List<CourseEnrollment>
+                    {
+                        new() { UserId = student.Id, CourseId = course1.Id, EnrollmentDate = DateTime.Now.AddDays(-5), CompletionPercentage = 45 },
+                        new() { UserId = student.Id, CourseId = course2.Id, EnrollmentDate = DateTime.Now.AddDays(-2), CompletionPercentage = 10 },
+                    };
+                    await context.CourseEnrollments.AddRangeAsync(enrollments);
+                    
+                    // Mark some lessons as complete for course 1
+                    var course1Lessons = course1.Modules.SelectMany(m => m.Lessons).Take(3).ToList();
+                    foreach(var lesson in course1Lessons)
+                    {
+                        await context.StudentProgresses.AddAsync(new StudentProgress
+                        {
+                            UserId = student.Id,
+                            LessonId = lesson.Id,
+                            IsCompleted = true,
+                            CompletedDate = DateTime.Now.AddDays(-3)
+                        });
+                    }
+                    
+                    await context.SaveChangesAsync();
+                }
             }
         }
     }
