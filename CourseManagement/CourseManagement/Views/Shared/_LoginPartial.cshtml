@@ -30,6 +30,19 @@
             @if (User.IsInRole("Admin") || User.IsInRole("Employee"))
             {
                 <li>
+                    <a class="dropdown-item py-2" asp-controller="Dashboard" asp-action="Index">
+                        <i class="fas fa-chart-line fa-fw me-2 text-info"></i>Bảng điều khiển
+                    </a>
+                </li>
+                @if (User.IsInRole("Admin"))
+                {
+                    <li>
+                        <a class="dropdown-item py-2" asp-controller="Users" asp-action="Index">
+                            <i class="fas fa-users-cog fa-fw me-2 text-primary"></i>Quản lý người dùng
+                        </a>
+                    </li>
+                }
+                <li>
                     <a class="dropdown-item py-2" asp-controller="Courses" asp-action="Create">
                         <i class="fas fa-plus-circle fa-fw me-2 text-success"></i>Tạo khóa học mới
                     </a>
