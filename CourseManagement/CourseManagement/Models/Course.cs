@@ -1,4 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
 using System.Reflection;
 
@@ -46,6 +46,7 @@ namespace CourseManagement.Models
         public Category Category { get; set; }  
 
         public ICollection<Module> Modules { get; set; }  
-        public ICollection<CourseEnrollment> CourseEnrollments { get; set; }  
+        public ICollection<CourseEnrollment> CourseEnrollments { get; set; }
+        public ICollection<CourseReview> CourseReviews { get; set; }
     }
 }

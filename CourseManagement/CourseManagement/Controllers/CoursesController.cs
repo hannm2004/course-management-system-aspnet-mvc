@@ -30,6 +30,7 @@ namespace CourseManagement.Controllers
                 .Include(c => c.Category)
                 .Include(c => c.Instructor)
                 .Include(c => c.CourseEnrollments)
+                .Include(c => c.CourseReviews)
                 .AsQueryable();
 
             if (!string.IsNullOrWhiteSpace(search))
@@ -60,6 +61,7 @@ namespace CourseManagement.Controllers
                 .Include(c => c.Instructor)
                 .Include(c => c.Modules).ThenInclude(m => m.Lessons)
                 .Include(c => c.CourseEnrollments)
+                .Include(c => c.CourseReviews).ThenInclude(r => r.User)
                 .FirstOrDefaultAsync(m => m.Id == id);
 
             if (course == null) return NotFound();

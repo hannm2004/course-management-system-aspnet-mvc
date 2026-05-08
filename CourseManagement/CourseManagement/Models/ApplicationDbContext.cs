@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
 namespace CourseManagement.Models
@@ -16,6 +16,7 @@ namespace CourseManagement.Models
         public DbSet<Lesson> Lessons { get; set; }
         public DbSet<CourseEnrollment> CourseEnrollments { get; set; }
         public DbSet<StudentProgress> StudentProgresses { get; set; }
+        public DbSet<CourseReview> CourseReviews { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

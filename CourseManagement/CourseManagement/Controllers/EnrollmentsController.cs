@@ -221,5 +221,23 @@ namespace CourseManagement.Controllers
             TempData["Success"] = "Đã đánh dấu bài học hoàn thành!";
             return RedirectToAction(nameof(Learn), new { courseId, lessonId });
         }
+
+        public async Task<IActionResult> Certificate(int courseId)
+        {
+            var userId = _userManager.GetUserId(User);
+            var enrollment = await _context.CourseEnrollments
+                .Include(e => e.Course)
+                    .ThenInclude(c => c.Instructor)
+                .Include(e => e.User)
+                .FirstOrDefaultAsync(e => e.CourseId == courseId && e.UserId == userId);
+
+            if (enrollment == null || !enrollment.IsCompleted)
+            {
+                TempData["Error"] = "Bạn chưa hoàn thành khóa học này để nhận chứng chỉ.";
+                return RedirectToAction(nameof(MyEnrollments));
+            }
+
+            return View(enrollment);
+        }
     }
 }

@@ -260,6 +260,18 @@ namespace CourseManagement.Data
                     
                     await context.SaveChangesAsync();
                 }
+
+                // ── 8. Demo Reviews ──────────────────────────────────────
+                if (!await context.CourseReviews.AnyAsync())
+                {
+                    var reviews = new List<CourseReview>
+                    {
+                        new() { CourseId = course1.Id, UserId = student.Id, Rating = 5, Comment = "Khóa học rất chi tiết và dễ hiểu. Giảng viên dạy rất nhiệt tình!", CreatedAt = DateTime.Now.AddDays(-2) },
+                        new() { CourseId = course2.Id, UserId = student.Id, Rating = 4, Comment = "Nội dung tốt, tuy nhiên phần nâng cao hơi nhanh.", CreatedAt = DateTime.Now.AddDays(-1) }
+                    };
+                    await context.CourseReviews.AddRangeAsync(reviews);
+                    await context.SaveChangesAsync();
+                }
             }
         }
     }
