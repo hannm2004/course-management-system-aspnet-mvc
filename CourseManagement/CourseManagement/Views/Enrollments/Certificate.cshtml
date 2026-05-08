@@ -1,0 +1,192 @@
+@model CourseManagement.Models.CourseEnrollment
+@{
+    Layout = null;
+    var fullName = Model.User.FullName ?? Model.User.UserName;
+}
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chứng chỉ hoàn thành - @Model.Course.Title</title>
+    <link href="https://fonts.googleapis.com/css2?family=Pinyon+Script&family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: #f0f2f5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            font-family: 'Montserrat', sans-serif;
+        }
+
+        .certificate-container {
+            width: 842px;
+            height: 595px; /* A4 Landscape */
+            background: white;
+            padding: 20px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.1);
+            position: relative;
+            box-sizing: border-box;
+            border: 15px solid #1a1a2e;
+        }
+
+        .certificate-inner {
+            border: 2px solid #667eea;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 40px;
+            box-sizing: border-box;
+            position: relative;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: 800;
+            color: #1a1a2e;
+            margin-bottom: 30px;
+        }
+
+        .logo span { color: #667eea; }
+
+        .title {
+            font-size: 42px;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: #1a1a2e;
+            letter-spacing: 5px;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            font-size: 18px;
+            color: #555;
+            margin-bottom: 40px;
+        }
+
+        .presented-to {
+            font-size: 16px;
+            font-style: italic;
+            color: #777;
+            margin-bottom: 10px;
+        }
+
+        .student-name {
+            font-family: 'Pinyon Script', cursive;
+            font-size: 64px;
+            color: #667eea;
+            margin-bottom: 20px;
+        }
+
+        .course-text {
+            font-size: 18px;
+            text-align: center;
+            max-width: 600px;
+            line-height: 1.6;
+            color: #333;
+            margin-bottom: 40px;
+        }
+
+        .course-title {
+            font-weight: 700;
+            display: block;
+            font-size: 24px;
+            color: #1a1a2e;
+            margin-top: 10px;
+        }
+
+        .footer {
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            margin-top: auto;
+            padding: 0 40px;
+        }
+
+        .signature-block {
+            text-align: center;
+            border-top: 1px solid #ccc;
+            padding-top: 10px;
+            width: 180px;
+        }
+
+        .signature-name { font-weight: 700; font-size: 14px; }
+        .signature-title { font-size: 12px; color: #777; }
+
+        .date-block {
+            text-align: center;
+            padding-top: 10px;
+            font-size: 14px;
+            color: #555;
+        }
+
+        .watermark {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 150px;
+            color: rgba(102,126,234,0.03);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .btn-print {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 700;
+            box-shadow: 0 4px 15px rgba(102,126,234,0.3);
+        }
+
+        @@media print {
+            .btn-print { display: none; }
+            body { background: white; }
+            .certificate-container { box-shadow: none; margin: 0; }
+        }
+    </style>
+</head>
+<body>
+    <button class="btn-print" onclick="window.print()">In chứng chỉ</button>
+
+    <div class="certificate-container">
+        <div class="watermark"><i class="fas fa-graduation-cap"></i></div>
+        <div class="certificate-inner">
+            <div class="logo">Edu<span>Manage</span></div>
+            <div class="title">Chứng chỉ</div>
+            <div class="subtitle">Hoàn thành khóa học</div>
+            
+            <div class="presented-to">Chứng nhận dành cho</div>
+            <div class="student-name">@fullName</div>
+            
+            <div class="course-text">
+                Đã hoàn thành xuất sắc khóa học trực tuyến 
+                <span class="course-title">@Model.Course.Title</span>
+                Vào ngày @DateTime.Now.ToString("dd") tháng @DateTime.Now.ToString("MM") năm @DateTime.Now.ToString("yyyy")
+            </div>
+
+            <div class="footer">
+                <div class="date-block">
+                    Mã chứng chỉ: #CM-@Model.Id.ToString("D6")
+                </div>
+                <div class="signature-block">
+                    <div class="signature-name">@(Model.Course.Instructor?.FullName ?? "Ban quản trị EduManage")</div>
+                    <div class="signature-title">Giảng viên hướng dẫn</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/js/all.min.js"></script>
+</body>
+</html>

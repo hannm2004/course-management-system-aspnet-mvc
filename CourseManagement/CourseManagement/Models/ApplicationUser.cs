@@ -10,5 +10,6 @@ namespace CourseManagement.Models
         public ICollection<CourseEnrollment> CourseEnrollments { get; set; } = new List<CourseEnrollment>();
         public ICollection<Course> CreatedCourses { get; set; } = new List<Course>();
         public ICollection<StudentProgress> StudentProgresses { get; set; } = new List<StudentProgress>();
+        public ICollection<CourseReview> CourseReviews { get; set; } = new List<CourseReview>();
     }
 }

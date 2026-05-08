@@ -110,13 +110,22 @@
                         <div class="card-body-dark d-flex flex-column">
                             <span class="badge-category">@course.Category?.Name</span>
                             <h3 class="course-title">@course.Title</h3>
-                            <p class="course-desc">@course.Description</p>
+                             <p class="course-desc">@course.Description</p>
+                             
+                             <div class="mt-2 d-flex justify-content-between align-items-center" style="font-size:0.75rem; color:var(--text-secondary);">
+                                 <span><i class="fas fa-user-tie me-1"></i> @(course.Instructor?.FullName ?? course.Instructor?.UserName ?? "Admin")</span>
+                                 @if (course.CourseReviews != null && course.CourseReviews.Any())
+                                 {
+                                     var avg = course.CourseReviews.Average(r => r.Rating);
+                                     <span class="text-warning"><i class="fas fa-star"></i> @avg.ToString("0.0")</span>
+                                 }
+                             </div>
 
-                            <div class="mt-2" style="color:var(--text-secondary); font-size:0.78rem;">
-                                <i class="fas fa-users me-1"></i> @(course.CourseEnrollments?.Count ?? 0) học viên
-                                &nbsp;|&nbsp;
-                                <i class="fas fa-calendar me-1"></i> @course.StartDate.ToString("dd/MM/yyyy")
-                            </div>
+                             <div class="mt-2" style="color:var(--text-secondary); font-size:0.78rem;">
+                                 <i class="fas fa-users me-1"></i> @(course.CourseEnrollments?.Count ?? 0) học viên
+                                 &nbsp;|&nbsp;
+                                 <i class="fas fa-calendar me-1"></i> @course.StartDate.ToString("dd/MM/yyyy")
+                             </div>
 
                             <div class="mt-auto pt-3 border-top d-flex justify-content-between align-items-center"
                                  style="border-color:var(--border-color) !important;">
