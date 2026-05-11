@@ -777,7 +777,7 @@
                                 @Html.AntiForgeryToken()
                                 <input type="hidden" name="courseId" value="@Model.Id" />
                                 <button type="submit" class="btn-enroll">
-                                    <i class="fas fa-user-plus"></i>Đăng ký ngay - Miễn phí
+                                    <i class="fas fa-user-plus"></i>@(Model.Price == 0 ? "Đăng ký ngay - Miễn phí" : $"Đăng ký ngay - {Model.Price:N0} ₫")
                                 </button>
                             </form>
                         }

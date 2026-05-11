@@ -116,9 +116,18 @@ namespace CourseManagement.Controllers
         [Authorize]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var category = await _context.Categories.FindAsync(id);
+            var category = await _context.Categories
+                .Include(c => c.Courses)
+                .FirstOrDefaultAsync(c => c.Id == id);
+
             if (category != null)
             {
+                if (category.Courses != null && category.Courses.Any())
+                {
+                    TempData["Error"] = "Không thể xóa danh mục này vì đang có khóa học thuộc danh mục. Hãy xóa hoặc chuyển các khóa học sang danh mục khác trước.";
+                    return RedirectToAction(nameof(Delete), new { id });
+                }
+
                 _context.Categories.Remove(category);
                 await _context.SaveChangesAsync();
                 TempData["Success"] = "Xóa danh mục thành công!";

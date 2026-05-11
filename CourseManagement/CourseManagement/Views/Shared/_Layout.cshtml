@@ -20,6 +20,9 @@
     <!-- Custom CSS -->
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
 
+    <!-- Toastr -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css" />
+
     @await RenderSectionAsync("Styles", required: false)
 </head>
 <body>
@@ -132,10 +135,29 @@
     <!-- Scripts -->
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
 
-    <!-- Navbar scroll effect -->
+    <!-- Global Toastr Config & TempData handling -->
     <script>
+        toastr.options = {
+            "closeButton": true,
+            "progressBar": true,
+            "positionClass": "toast-top-right",
+            "showDuration": "300",
+            "hideDuration": "1000",
+            "timeOut": "5000",
+            "extendedTimeOut": "1000",
+            "showEasing": "swing",
+            "hideEasing": "linear",
+            "showMethod": "fadeIn",
+            "hideMethod": "fadeOut"
+        };
+
+        @if (TempData["Success"] != null) { <text>toastr.success('@TempData["Success"]');</text> }
+        @if (TempData["Error"] != null) { <text>toastr.error('@TempData["Error"]');</text> }
+        @if (TempData["Warning"] != null) { <text>toastr.warning('@TempData["Warning"]');</text> }
+
         window.addEventListener('scroll', function () {
             const nav = document.getElementById('mainNav');
             if (window.scrollY > 20) {

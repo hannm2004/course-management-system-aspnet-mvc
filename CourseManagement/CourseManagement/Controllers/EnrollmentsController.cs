@@ -166,12 +166,30 @@ namespace CourseManagement.Controllers
             return View();
         }
 
-        // POST: Enrollments/MarkComplete
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> MarkComplete(int lessonId, int courseId)
         {
             var userId = _userManager.GetUserId(User);
+
+            // Security Check: Is the user enrolled?
+            var isEnrolled = await _context.CourseEnrollments
+                .AnyAsync(e => e.CourseId == courseId && e.UserId == userId);
+            
+            if (!isEnrolled)
+            {
+                return Forbid();
+            }
+
+            // Verify the lesson belongs to the course
+            var lesson = await _context.Lessons
+                .Include(l => l.Module)
+                .FirstOrDefaultAsync(l => l.Id == lessonId && l.Module.CourseId == courseId);
+
+            if (lesson == null)
+            {
+                return BadRequest("Bài học không thuộc khóa học này.");
+            }
 
             var existing = await _context.StudentProgresses
                 .FirstOrDefaultAsync(sp => sp.UserId == userId && sp.LessonId == lessonId);
