@@ -26,6 +26,7 @@ namespace CourseManagement.Models
         [Required]
         [Column(TypeName = "decimal(18,2)")]  
         [Display(Name = "Giá (VNĐ)")]
+        [Range(0, 1000000000, ErrorMessage = "Giá không được là số âm")]
         public decimal Price { get; set; }
 
         [Display(Name = "Hình ảnh")]

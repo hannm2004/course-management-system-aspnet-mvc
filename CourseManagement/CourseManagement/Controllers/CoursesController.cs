@@ -29,6 +29,7 @@ namespace CourseManagement.Controllers
             var query = _context.Courses
                 .Include(c => c.Category)
                 .Include(c => c.Instructor)
+                .Include(c => c.Modules)
                 .Include(c => c.CourseEnrollments)
                 .Include(c => c.CourseReviews)
                 .AsQueryable();

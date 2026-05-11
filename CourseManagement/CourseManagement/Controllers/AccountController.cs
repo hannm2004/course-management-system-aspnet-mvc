@@ -108,5 +108,61 @@ namespace CourseManagement.Controllers
         {
             return View();
         }
+
+        [HttpGet]
+        public async Task<IActionResult> Profile()
+        {
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null) return RedirectToAction("Login");
+
+            var model = new ProfileViewModel
+            {
+                FullName = user.FullName ?? "",
+                Email = user.Email ?? "",
+                PhoneNumber = user.PhoneNumber,
+                Address = user.Address
+            };
+
+            return View(model);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Profile(ProfileViewModel model)
+        {
+            if (ModelState.IsValid)
+            {
+                var user = await _userManager.GetUserAsync(User);
+                if (user == null) return RedirectToAction("Login");
+
+                user.FullName = model.FullName;
+                user.PhoneNumber = model.PhoneNumber;
+                user.Address = model.Address;
+
+                var result = await _userManager.UpdateAsync(user);
+                if (result.Succeeded)
+                {
+                    // Handle password change if provided
+                    if (!string.IsNullOrEmpty(model.NewPassword))
+                    {
+                        var token = await _userManager.GeneratePasswordResetTokenAsync(user);
+                        var passwordResult = await _userManager.ResetPasswordAsync(user, token, model.NewPassword);
+                        if (!passwordResult.Succeeded)
+                        {
+                            foreach (var error in passwordResult.Errors)
+                                ModelState.AddModelError(string.Empty, error.Description);
+                            return View(model);
+                        }
+                    }
+
+                    TempData["Success"] = "Cập nhật hồ sơ thành công!";
+                    return RedirectToAction(nameof(Profile));
+                }
+
+                foreach (var error in result.Errors)
+                    ModelState.AddModelError(string.Empty, error.Description);
+            }
+            return View(model);
+        }
     }
 }
